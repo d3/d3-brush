@@ -68,13 +68,13 @@ export default function() {
     resize.enter().append("g")
         .attr("class", function(d) { return "resize resize--" + d; })
         .style("cursor", function(d) { return brushCursor[d]; })
-        .style("visibility", "hidden")
         .style("display", "none")
       .append("rect")
         .attr("x", function(d) { return /[ew]$/.test(d) ? -3 : null; })
         .attr("y", function(d) { return /^[ns]/.test(d) ? -3 : null; })
         .attr("width", 6)
-        .attr("height", 6);
+        .attr("height", 6)
+        .style("visibility", "hidden");
   }
 
   brush.extent = function(_) {

@@ -35,7 +35,7 @@ export default function() {
   // TODO the initial render of the brush assumes that the active region is empty
   function brush(selection) {
     selection
-        .style("pointer-events", "all")
+        .attr("pointer-events", "all")
         .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
         // .on("mousedown.brush", mousedowned) // TODO
         // .on("touchstart.brush", touchstarted); // TODO
@@ -45,8 +45,8 @@ export default function() {
 
     background.enter().append("rect")
         .attr("class", "background")
-        .style("visibility", "hidden")
-        .style("cursor", "crosshair")
+        .attr("fill", "none")
+        .attr("cursor", "crosshair")
       .merge(background)
         .attr("x", function(d) { return d[0][0]; })
         .attr("y", function(d) { return d[0][1]; })
@@ -57,7 +57,7 @@ export default function() {
       .data(function() { return [null]; })
       .enter().append("rect")
         .attr("class", "extent")
-        .style("cursor", "move")
+        .attr("cursor", "move")
         .style("display", "none");
 
     var resize = selection.selectAll(".resize")
@@ -67,14 +67,14 @@ export default function() {
 
     resize.enter().append("g")
         .attr("class", function(d) { return "resize resize--" + d; })
-        .style("cursor", function(d) { return brushCursor[d]; })
+        .attr("cursor", function(d) { return brushCursor[d]; })
         .style("display", "none")
       .append("rect")
         .attr("x", function(d) { return /[ew]$/.test(d) ? -3 : null; })
         .attr("y", function(d) { return /^[ns]/.test(d) ? -3 : null; })
         .attr("width", 6)
         .attr("height", 6)
-        .style("visibility", "hidden");
+        .attr("fill", "none");
   }
 
   brush.extent = function(_) {

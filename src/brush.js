@@ -205,6 +205,7 @@ export default function() {
 
       switch (modeX) {
         case MODE_DRAG: {
+          dx = Math.max(l.extent[0][0] - w, Math.min(l.extent[1][0] - e, dx));
           w1 = w + dx;
           e1 = e + dx;
           break;
@@ -213,19 +214,19 @@ export default function() {
           if (w + dx > e) {
             modeX = w, w = e, e = modeX, modeX = MODE_E;
             w1 = w;
-            e1 = e + dx;
+            e1 = clampX(e + dx);
           } else {
-            w1 = w + dx;
+            w1 = clampX(w + dx);
           }
           break;
         }
         case MODE_E: {
           if (e + dx < w) {
             modeX = w, w = e, e = modeX, modeX = MODE_W;
-            w1 = w + dx;
+            w1 = clampX(w + dx);
             e1 = e;
           } else {
-            e1 = e + dx;
+            e1 = clampX(e + dx);
           }
           break;
         }
@@ -233,6 +234,7 @@ export default function() {
 
       switch (modeY) {
         case MODE_DRAG: {
+          dy = Math.max(l.extent[0][1] - n, Math.min(l.extent[1][1] - s, dy));
           n1 = n + dy;
           s1 = s + dy;
           break;
@@ -241,28 +243,23 @@ export default function() {
           if (n + dy > s) {
             modeY = n, n = s, s = modeY, modeY = MODE_S;
             n1 = n;
-            s1 = s + dy;
+            s1 = clampY(s + dy);
           } else {
-            n1 = n + dy;
+            n1 = clampY(n + dy);
           }
           break;
         }
         case MODE_S: {
           if (s + dy < n) {
             modeY = n, n = s, s = modeY, modeY = MODE_N;
-            n1 = n + dy;
+            n1 = clampY(n + dy);
             s1 = s;
           } else {
-            s1 = s + dy;
+            s1 = clampY(s + dy);
           }
           break;
         }
       }
-
-      w1 = Math.min(l.extent[1][0], Math.max(l.extent[0][0], w1));
-      n1 = Math.min(l.extent[1][1], Math.max(l.extent[0][1], n1));
-      e1 = Math.min(l.extent[1][0], Math.max(l.extent[0][0], e1));
-      s1 = Math.min(l.extent[1][1], Math.max(l.extent[0][1], s1));
 
       if (l.selected[0][0] !== w1
           || l.selected[0][1] !== e1
@@ -321,6 +318,14 @@ export default function() {
         event.preventDefault();
         event.stopPropagation();
       }
+    }
+
+    function clampX(x) {
+      return Math.min(l.extent[1][0], Math.max(l.extent[0][0], x));
+    }
+
+    function clampY(y) {
+      return Math.min(l.extent[1][1], Math.max(l.extent[0][1], y));
     }
   }
 

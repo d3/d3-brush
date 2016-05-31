@@ -4,7 +4,13 @@ import {customEvent, mouse, select} from "d3-selection";
 import constant from "./constant";
 import BrushEvent from "./event";
 
-var N = "n", E = "e", S = "s", W = "w", NW = "nw", NE = "ne", SE = "se", SW = "sw",
+var MODE_DRAG = {},
+    MODE_DRAW = {},
+    MODE_N = {},
+    MODE_S = {},
+    MODE_E = {},
+    MODE_W = {},
+    N = "n", E = "e", S = "s", W = "w", NW = "nw", NE = "ne", SE = "se", SW = "sw",
     // resizesX = [E, W],
     // resizesY = [N, S],
     resizesXY = [N, E, S, W, NW, NE, SE, SW];
@@ -22,6 +28,32 @@ var cursors = {
   sw: "nesw-resize"
 };
 
+var modeXs = {
+  background: MODE_DRAW,
+  selection: MODE_DRAG,
+  n: null,
+  e: MODE_E,
+  s: null,
+  w: MODE_W,
+  nw: MODE_W,
+  ne: MODE_E,
+  se: MODE_E,
+  sw: MODE_W
+};
+
+var modeYs = {
+  background: MODE_DRAW,
+  selection: MODE_DRAG,
+  n: MODE_N,
+  e: null,
+  s: MODE_S,
+  w: null,
+  nw: MODE_N,
+  ne: MODE_N,
+  se: MODE_S,
+  sw: MODE_S
+};
+
 function defaultExtent() {
   var svg = this.ownerSVGElement;
   return [[0, 0], svg
@@ -34,7 +66,7 @@ export default function() {
       listeners = dispatch(brush, "start", "brush", "end"),
       resizes = resizesXY;
 
-  // TODO tell the brush whether you can brush in x, y or x and y.
+  // TODO tell the brush whether you can brush in x, y or x and y?
   // TODO tell the brush whether to clamp the selection to the extent?
   function brush(group) {
     var background = group
@@ -128,8 +160,9 @@ export default function() {
   function mousedowned() {
     var that = this,
         group = select(that),
-        data = event.target.__data__,
-        type = data.type,
+        type = event.target.__data__.type,
+        modeX = modeXs[type],
+        modeY = modeYs[type],
         l = local(that),
         x0 = l.selected[0][0],
         y0 = l.selected[0][1],
@@ -137,6 +170,8 @@ export default function() {
         y1 = l.selected[1][1],
         point0 = mouse(that),
         point,
+        dx,
+        dy,
         emit = emitter(that, arguments);
 
     select(event.view)
@@ -152,35 +187,52 @@ export default function() {
 
     function mousemoved() {
       point = mouse(that);
+      dx = point[0] - point0[0];
+      dy = point[1] - point0[1];
 
-      var dx = point[0] - point0[0],
-          dy = point[1] - point0[1];
-
-      if (type === "selection") {
-        if (data.type === type || data.type[0] === "n" || data.type[0] === "s") {
-          l.selected[0][1] = y0 + dy;
-          l.selected[1][1] = y1 + dy;
+      switch (modeX) {
+        case MODE_DRAW: {
+          l.selected[0][0] = Math.min(point[0], point0[0]);
+          l.selected[1][0] = Math.max(point[0], point0[0]);
+          break;
         }
-        if (data.type === type || data.type[data.type.length - 1] === "e" || data.type[data.type.length - 1] === "w") {
+        case MODE_DRAG: {
           l.selected[0][0] = x0 + dx;
           l.selected[1][0] = x1 + dx;
+          break;
+        }
+        case MODE_W: {
+          l.selected[0][0] = Math.min(x0 + dx, x1);
+          l.selected[1][0] = Math.max(x0 + dx, x1);
+          break;
+        }
+        case MODE_E: {
+          l.selected[0][0] = Math.min(x0, x1 + dx);
+          l.selected[1][0] = Math.max(x0, x1 + dx);
+          break;
         }
       }
 
-      else if (resizesXY.indexOf(type) >= 0) {
-        if (type[0] === "n") {
+      switch (modeY) {
+        case MODE_DRAW: {
+          l.selected[0][1] = Math.min(point[1], point0[1]);
+          l.selected[1][1] = Math.max(point[1], point0[1]);
+          break;
+        }
+        case MODE_DRAG: {
+          l.selected[0][1] = y0 + dy;
+          l.selected[1][1] = y1 + dy;
+          break;
+        }
+        case MODE_N: {
           l.selected[0][1] = Math.min(y0 + dy, y1);
           l.selected[1][1] = Math.max(y0 + dy, y1);
-        } else if (type[0] === "s") {
+          break;
+        }
+        case MODE_S: {
           l.selected[0][1] = Math.min(y0, y1 + dy);
           l.selected[1][1] = Math.max(y0, y1 + dy);
-        }
-        if (type[type.length - 1] === "e") {
-          l.selected[0][0] = Math.min(x0, x1 + dx);
-          l.selected[1][0] = Math.max(x0, x1 + dx);
-        } else if (type[type.length - 1] === "w") {
-          l.selected[0][0] = Math.min(x0 + dx, x1);
-          l.selected[1][0] = Math.max(x0 + dx, x1);
+          break;
         }
       }
 
@@ -197,13 +249,17 @@ export default function() {
 
     function keydowned() {
       if (event.keyCode == 32) {
-        if (type !== "selection") {
+        if (modeX === MODE_E || modeX === MODE_W) {
+          modeX = MODE_DRAG;
           x0 = l.selected[0][0];
-          y0 = l.selected[0][1];
           x1 = l.selected[1][0];
+          point0[0] = point[0];
+        }
+        if (modeY === MODE_N || modeY === MODE_S) {
+          modeY = MODE_DRAG;
+          y0 = l.selected[0][1];
           y1 = l.selected[1][1];
-          point0 = point;
-          type = "selection";
+          point0[1] = point[1];
         }
         event.preventDefault();
         event.stopPropagation();
@@ -212,13 +268,17 @@ export default function() {
 
     function keyupped() {
       if (event.keyCode == 32) {
-        if (data.type !== type) { // TODO This ain’t right.
+        if (modeX === MODE_DRAG && modeX !== modeXs[type]) { // TODO
+          modeX = modeXs[type];
           x0 = l.selected[0][0];
-          y0 = l.selected[0][1];
           x1 = l.selected[1][0];
+          point0[0] = point[0];
+        }
+        if (modeY === MODE_DRAG && modeY !== modeYs[type]) { // TODO
+          modeY = modeYs[type];
+          y0 = l.selected[0][1];
           y1 = l.selected[1][1];
-          point0 = point;
-          type = data.type;
+          point0[1] = point[1];
         }
         event.preventDefault();
         event.stopPropagation();

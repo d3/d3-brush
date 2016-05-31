@@ -5,7 +5,6 @@ import constant from "./constant";
 import BrushEvent from "./event";
 
 var MODE_DRAG = {},
-    MODE_DRAW = {},
     MODE_N = {},
     MODE_S = {},
     MODE_E = {},
@@ -29,7 +28,7 @@ var cursors = {
 };
 
 var modeXs = {
-  background: MODE_DRAW,
+  background: MODE_W,
   selection: MODE_DRAG,
   n: null,
   e: MODE_E,
@@ -42,7 +41,7 @@ var modeXs = {
 };
 
 var modeYs = {
-  background: MODE_DRAW,
+  background: MODE_N,
   selection: MODE_DRAG,
   n: MODE_N,
   e: null,
@@ -176,6 +175,11 @@ export default function() {
         dy,
         emit = emitter(that, arguments);
 
+    if (type === "background") {
+      x0 = x1 = l.selected[0][0] = l.selected[1][0] = point0[0];
+      y0 = y1 = l.selected[0][1] = l.selected[1][1] = point0[1];
+    }
+
     select(event.view)
         .on("keydown.brush", keydowned, true)
         .on("keyup.brush", keyupped, true)
@@ -185,6 +189,7 @@ export default function() {
     dragDisable(event.view);
     group.interrupt().selectAll("*").interrupt();
     group.attr("pointer-events", "none").selectAll(".background").attr("cursor", cursors[type]);
+    redraw.call(that);
     emit("start");
 
     function mousemoved() {
@@ -193,11 +198,6 @@ export default function() {
       dy = point[1] - point0[1];
 
       switch (modeX) {
-        case MODE_DRAW: {
-          l.selected[0][0] = Math.min(point[0], point0[0]);
-          l.selected[1][0] = Math.max(point[0], point0[0]);
-          break;
-        }
         case MODE_DRAG: {
           l.selected[0][0] = x0 + dx;
           l.selected[1][0] = x1 + dx;
@@ -226,11 +226,6 @@ export default function() {
       }
 
       switch (modeY) {
-        case MODE_DRAW: {
-          l.selected[0][1] = Math.min(point[1], point0[1]);
-          l.selected[1][1] = Math.max(point[1], point0[1]);
-          break;
-        }
         case MODE_DRAG: {
           l.selected[0][1] = y0 + dy;
           l.selected[1][1] = y1 + dy;

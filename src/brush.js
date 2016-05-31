@@ -38,12 +38,18 @@ export default function() {
   // TODO the initial render of the brush assumes that the selected extent is empty
   // TODO how do you update the extent of the background?
   function brush(selection) {
-    selection.selectAll(".background")
-      .data(function() { return [extent.apply(this, arguments)]; })
-      .enter().append("rect")
+    var background = selection.selectAll(".background")
+      .data(function() { return [extent.apply(this, arguments)]; });
+
+    background.enter().append("rect")
         .attr("class", "background")
         .attr("fill", "none")
-        .attr("cursor", "crosshair");
+        .attr("cursor", "crosshair")
+      .merge(background)
+        .attr("x", function(d) { return d[0][0]; })
+        .attr("y", function(d) { return d[0][1]; })
+        .attr("width", function(d) { return d[1][0] - d[0][0]; })
+        .attr("height", function(d) { return d[1][1] - d[0][1]; });
 
     selection.selectAll(".extent")
       .data([null])

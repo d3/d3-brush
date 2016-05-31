@@ -135,7 +135,8 @@ export default function() {
         y0 = l.selected[0][1],
         x1 = l.selected[1][0],
         y1 = l.selected[1][1],
-        origin = mouse(that),
+        point0 = mouse(that),
+        point,
         emit = emitter(that, arguments);
 
     select(event.view)
@@ -150,21 +151,41 @@ export default function() {
     emit("start");
 
     function mousemoved() {
-      var point = mouse(that),
-          dx = point[0] - origin[0],
-          dy = point[1] - origin[1];
+      point = mouse(that);
 
-      switch (type) {
-        case "selection": {
-          l.selected[0][0] = x0 + dx;
+      var dx = point[0] - point0[0],
+          dy = point[1] - point0[1];
+
+      if (type === "selection") {
+        if (data.type === type || data.type[0] === "n" || data.type[0] === "s") {
           l.selected[0][1] = y0 + dy;
-          l.selected[1][0] = x1 + dx;
           l.selected[1][1] = y1 + dy;
-          redraw.call(that);
-          emit("brush");
-          break;
+        }
+        if (data.type === type || data.type[data.type.length - 1] === "e" || data.type[data.type.length - 1] === "w") {
+          l.selected[0][0] = x0 + dx;
+          l.selected[1][0] = x1 + dx;
         }
       }
+
+      else if (resizesXY.indexOf(type) >= 0) {
+        if (type[0] === "n") {
+          l.selected[0][1] = Math.min(y0 + dy, y1);
+          l.selected[1][1] = Math.max(y0 + dy, y1);
+        } else if (type[0] === "s") {
+          l.selected[0][1] = Math.min(y0, y1 + dy);
+          l.selected[1][1] = Math.max(y0, y1 + dy);
+        }
+        if (type[type.length - 1] === "e") {
+          l.selected[0][0] = Math.min(x0, x1 + dx);
+          l.selected[1][0] = Math.max(x0, x1 + dx);
+        } else if (type[type.length - 1] === "w") {
+          l.selected[0][0] = Math.min(x0 + dx, x1);
+          l.selected[1][0] = Math.max(x0 + dx, x1);
+        }
+      }
+
+      redraw.call(that);
+      emit("brush");
     }
 
     function mouseupped() {
@@ -177,10 +198,12 @@ export default function() {
     function keydowned() {
       if (event.keyCode == 32) {
         if (type !== "selection") {
-          // center = null;
-          // origin[0] -= l.selected[1][0];
-          // origin[1] -= l.selected[1][1];
-          type = "space";
+          x0 = l.selected[0][0];
+          y0 = l.selected[0][1];
+          x1 = l.selected[1][0];
+          y1 = l.selected[1][1];
+          point0 = point;
+          type = "selection";
         }
         event.preventDefault();
         event.stopPropagation();
@@ -189,9 +212,12 @@ export default function() {
 
     function keyupped() {
       if (event.keyCode == 32) {
-        if (type === "space") {
-          // origin[0] += l.selected[1][0];
-          // origin[1] += l.selected[1][1];
+        if (data.type !== type) { // TODO This ain’t right.
+          x0 = l.selected[0][0];
+          y0 = l.selected[0][1];
+          x1 = l.selected[1][0];
+          y1 = l.selected[1][1];
+          point0 = point;
           type = data.type;
         }
         event.preventDefault();

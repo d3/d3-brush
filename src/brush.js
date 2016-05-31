@@ -163,6 +163,8 @@ export default function() {
         type = event.target.__data__.type,
         modeX = modeXs[type],
         modeY = modeYs[type],
+        modeX0,
+        modeY0,
         l = local(that),
         x0 = l.selected[0][0],
         y0 = l.selected[0][1],
@@ -202,13 +204,23 @@ export default function() {
           break;
         }
         case MODE_W: {
-          l.selected[0][0] = Math.min(x0 + dx, x1);
-          l.selected[1][0] = Math.max(x0 + dx, x1);
+          if (x0 + dx > x1) {
+            modeX = x0, x0 = x1, x1 = modeX, modeX = MODE_E;
+            l.selected[0][0] = x0;
+            l.selected[1][0] = x1 + dx;
+          } else {
+            l.selected[0][0] = x0 + dx;
+          }
           break;
         }
         case MODE_E: {
-          l.selected[0][0] = Math.min(x0, x1 + dx);
-          l.selected[1][0] = Math.max(x0, x1 + dx);
+          if (x1 + dx < x0) {
+            modeX = x0, x0 = x1, x1 = modeX, modeX = MODE_W;
+            l.selected[0][0] = x0 + dx;
+            l.selected[1][0] = x1;
+          } else {
+            l.selected[1][0] = x1 + dx;
+          }
           break;
         }
       }
@@ -225,13 +237,23 @@ export default function() {
           break;
         }
         case MODE_N: {
-          l.selected[0][1] = Math.min(y0 + dy, y1);
-          l.selected[1][1] = Math.max(y0 + dy, y1);
+          if (y0 + dy > y1) {
+            modeY = y0, y0 = y1, y1 = modeY, modeY = MODE_S;
+            l.selected[0][1] = y0;
+            l.selected[1][1] = y1 + dy;
+          } else {
+            l.selected[0][1] = y0 + dy;
+          }
           break;
         }
         case MODE_S: {
-          l.selected[0][1] = Math.min(y0, y1 + dy);
-          l.selected[1][1] = Math.max(y0, y1 + dy);
+          if (y1 + dy < y0) {
+            modeY = y0, y0 = y1, y1 = modeY, modeY = MODE_N;
+            l.selected[0][1] = y0 + dy;
+            l.selected[1][1] = y1;
+          } else {
+            l.selected[1][1] = y1 + dy;
+          }
           break;
         }
       }
@@ -250,13 +272,13 @@ export default function() {
     function keydowned() {
       if (event.keyCode == 32) {
         if (modeX === MODE_E || modeX === MODE_W) {
-          modeX = MODE_DRAG;
+          modeX0 = modeX, modeX = MODE_DRAG;
           x0 = l.selected[0][0];
           x1 = l.selected[1][0];
           point0[0] = point[0];
         }
         if (modeY === MODE_N || modeY === MODE_S) {
-          modeY = MODE_DRAG;
+          modeY0 = modeY, modeY = MODE_DRAG;
           y0 = l.selected[0][1];
           y1 = l.selected[1][1];
           point0[1] = point[1];
@@ -268,14 +290,14 @@ export default function() {
 
     function keyupped() {
       if (event.keyCode == 32) {
-        if (modeX === MODE_DRAG && modeX !== modeXs[type]) { // TODO
-          modeX = modeXs[type];
+        if (modeX0) {
+          modeX = modeX0, modeX0 = null;
           x0 = l.selected[0][0];
           x1 = l.selected[1][0];
           point0[0] = point[0];
         }
-        if (modeY === MODE_DRAG && modeY !== modeYs[type]) { // TODO
-          modeY = modeYs[type];
+        if (modeY0) {
+          modeY = modeY0, modeY0 = null;
           y0 = l.selected[0][1];
           y1 = l.selected[1][1];
           point0[1] = point[1];

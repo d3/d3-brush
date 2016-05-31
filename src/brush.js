@@ -1,6 +1,6 @@
 import {dispatch} from "d3-dispatch";
 import {dragDisable, dragEnable} from "d3-drag";
-import {customEvent, select} from "d3-selection";
+import {customEvent, mouse, select} from "d3-selection";
 import constant from "./constant";
 import BrushEvent from "./event";
 
@@ -117,84 +117,92 @@ export default function() {
   }
 
   function mousedowned() {
-    console.log("mousedown");
-
     var that = this,
         selection = select(that),
-        type = event.target.__data__.type;
-
+        data = event.target.__data__,
+        type = data.type,
+        l = local(that),
         // center,
-        // origin = mouse(that),
-        // offset;
+        // offset,
+        origin = mouse(that);
+
+    console.log("mousedown");
 
     select(event.view)
-        .on("keydown.brush", keydowned)
-        .on("keyup.brush", keyupped)
-        .on("mousemove.brush", mousemoved)
-        .on("mouseup.brush", mouseupped);
+        .on("keydown.brush", keydowned, true)
+        .on("keyup.brush", keyupped, true)
+        .on("mousemove.brush", mousemoved, true)
+        .on("mouseup.brush", mouseupped, true);
 
     dragDisable(event.view);
+    selection.interrupt().selectAll("*").interrupt();
+    selection.selectAll(".background").attr("cursor", cursors[type]);
+    selection.attr("pointer-events", "none");
 
-    // selection
-    //     .interrupt()
-    //   .selectAll("*")
-    //     .interrupt();
+    switch (type) {
+      case "selection": {
+        origin[0] = l.selected[0][0] - origin[0];
+        origin[1] = l.selected[0][1] - origin[1];
+        break;
+      }
 
-    // // If the extent was clicked on, drag rather than brush;
-    // // store the point between the mouse and extent origin instead.
-    // if (dragging) {
-    //   origin[0] = xExtent[0] - origin[0];
-    //   origin[1] = yExtent[0] - origin[1];
-    // }
+      case "n":
+      case "e":
+      case "s":
+      case "w":
+      case "nw":
+      case "ne":
+      case "se":
+      case "sw": {
+        var i = type[type.length - 1] === "w", j = type[0] === "n";
+        // offset = [l.selected[1 - i][0] - origin[0], l.selected[1 - j][1] - origin[1]];
+        origin[0] = l.selected[+i][0];
+        origin[1] = l.selected[+j][1];
+        break;
+      }
 
-    // // If a resizer was clicked on, record which side is to be resized.
-    // // Also, set the origin to the opposite side.
-    // else if (resize) {
-    //   var ex = +/w$/.test(resize),
-    //       ey = +/^n/.test(resize);
-    //   offset = [xExtent[1 - ex] - origin[0], yExtent[1 - ey] - origin[1]];
-    //   origin[0] = xExtent[ex];
-    //   origin[1] = yExtent[ey];
-    // }
-
-    // // If the ALT key is down when starting a brush, the center is at the mouse.
-    // else if (event.altKey) center = origin.slice();
-
-    // Propagate the active cursor to the background for the gesture.
-
-    selection.selectAll(".background")
-        .attr("cursor", cursors[type]);
-
-    selection
-        .attr("pointer-events", "none");
-
-    // selection.attr("pointer-events", "none");
+      // If the ALT key is down when starting a brush, center at the mouse.
+      case "background": {
+        // if (event.altKey) center = origin.slice();
+        break;
+      }
+    }
 
     function mousemoved() {
-      console.log("mousemove");
+      console.log("mousemove", type);
     }
 
     function mouseupped() {
       console.log("mouseup");
-
       dragEnable(event.view);
-
-      selection.selectAll(".background")
-          .attr("cursor", cursors.background);
-
-      selection
-          .attr("pointer-events", "all");
-
-      select(event.view)
-          .on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
+      selection.selectAll(".background").attr("cursor", cursors.background);
+      selection.attr("pointer-events", "all");
+      select(event.view).on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
     }
 
     function keydowned() {
-
+      if (event.keyCode == 32) {
+        if (type !== "selection") {
+          // center = null;
+          // origin[0] -= l.selected[1][0];
+          // origin[1] -= l.selected[1][1];
+          type = "space";
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      }
     }
 
     function keyupped() {
-
+      if (event.keyCode == 32) {
+        if (type === "space") {
+          // origin[0] += l.selected[1][0];
+          // origin[1] += l.selected[1][1];
+          type = data.type;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      }
     }
   }
 

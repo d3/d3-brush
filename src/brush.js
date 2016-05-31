@@ -20,63 +20,69 @@ function defaultExtent() {
       : [this.clientWidth, this.clientHeight]];
 }
 
+function resizeData(d) {
+  return {
+    id: d.id,
+    cursor: d.cursor,
+    extent: null
+  };
+}
+
 export default function() {
   var extent = defaultExtent,
       listeners = dispatch(brush, "start", "brush", "end"),
       resizes = brushResizes[0];
 
   // TODO tell the brush whether you can brush in x, y or x and y.
-  // TODO the initial render of the brush assumes that the active region is empty
+  // TODO tell the brush whether to clamp the selection to the extent.
+  // TODO the initial render of the brush assumes that the selected extent is empty
+  // TODO how do you update the extent of the background?
   function brush(selection) {
-    selection
-        .attr("pointer-events", "all")
-        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
-        // .on("mousedown.brush", mousedowned) // TODO
-        // .on("touchstart.brush", touchstarted); // TODO
-
-    var background = selection.selectAll(".background")
-      .data(function() { return [extent.apply(this, arguments)]; });
-
-    background.enter().append("rect")
+    selection.selectAll(".background")
+      .data(function() { return [extent.apply(this, arguments)]; })
+      .enter().append("rect")
         .attr("class", "background")
         .attr("fill", "none")
-        .attr("cursor", "crosshair")
-      .merge(background)
-        .attr("x", function(d) { return d[0][0]; })
-        .attr("y", function(d) { return d[0][1]; })
-        .attr("width", function(d) { return d[1][0] - d[0][0]; })
-        .attr("height", function(d) { return d[1][1] - d[0][1]; });
+        .attr("cursor", "crosshair");
 
     selection.selectAll(".extent")
-      .data(function() { return [null]; })
+      .data([null])
       .enter().append("rect")
         .attr("class", "extent")
         .attr("cursor", "move")
-        .attr("fill", "rgba(0,0,0,0.15)")
-        .style("display", "none");
+        .attr("fill", "rgba(0,0,0,0.15)");
 
     var resize = selection.selectAll(".resize")
-      .data(resizes, function(d) { return d.id; });
+      .data(resizes.map(resizeData), function(d) { return d.id; });
 
     resize.exit().remove();
 
     resize.enter().append("g")
         .attr("class", function(d) { return "resize resize--" + d.id; })
         .attr("cursor", function(d) { return d.cursor; })
-        .style("display", "none")
       .append("rect")
-        .attr("x", function(d) { return /[ew]$/.test(d.id) ? -3 : null; })
-        .attr("y", function(d) { return /^[ns]/.test(d.id) ? -3 : null; })
-        .attr("width", 6)
-        .attr("height", 6)
         .attr("fill", "none");
+
+    selection
+        .call(redraw)
+        .attr("pointer-events", "all")
+        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
+        // .on("mousedown.brush", mousedowned) // TODO
+        // .on("touchstart.brush", touchstarted); // TODO
   }
 
-  brush.move = function(selection, active) {
+  // TODO selection as transition
+  brush.move = function(selection, selected) {
     selection
         .interrupt()
-        .property("__brush", active);
+        .property("__brush", selected)
+        .call(redraw)
+        .call(emit, "start")
+        .call(emit, "brush")
+        .call(emit, "end");
+  };
 
+  function redraw(selection) {
     selection.select(".extent")
         .datum(function() { return this.parentNode.__brush; })
         .style("display", function(d) { return d == null ? "none" : null; })
@@ -94,13 +100,13 @@ export default function() {
       .select("rect")
         .attr("width", function(d) { return /^(n|s)$/.test(d.id) ? d.extent[1][0] - d.extent[0][0] : 6; })
         .attr("height", function(d) { return /^(e|w)$/.test(d.id) ? d.extent[1][1] - d.extent[0][1] : 6; });
+  }
 
+  function emit(selection, type) {
     selection.each(function() {
-      customEvent(new BrushEvent(brush, "start", this.__brush), listeners.apply, listeners, ["start", this, this]);
-      customEvent(new BrushEvent(brush, "brush", this.__brush), listeners.apply, listeners, ["brush", this, this]);
-      customEvent(new BrushEvent(brush, "end", this.__brush), listeners.apply, listeners, ["end", this, this]);
+      customEvent(new BrushEvent(brush, type, this.__brush), listeners.apply, listeners, [type, this, arguments]);
     });
-  };
+  }
 
   brush.extent = function(_) {
     return arguments.length ? (extent = typeof _ === "function" ? _ : constant([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), brush) : extent;

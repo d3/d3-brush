@@ -1,5 +1,5 @@
-export default function(target, type, active) {
+export default function(target, type, selected) {
   this.target = target;
   this.type = type;
-  this.active = active;
+  this.selected = selected;
 }

@@ -35,12 +35,10 @@ export default function() {
       resizes = resizesXY;
 
   // TODO tell the brush whether you can brush in x, y or x and y.
-  // TODO tell the brush whether to clamp the selection to the extent.
-  // TODO the initial render of the brush assumes that the selected extent is empty
-  // TODO how do you update the extent of the background?
-  function brush(selection) {
-    var background = selection
-        .property("__brush", initialLocal)
+  // TODO tell the brush whether to clamp the selection to the extent?
+  function brush(group) {
+    var background = group
+        .property("__brush", initialize)
       .selectAll(".background")
       .data([{type: "background"}]);
 
@@ -55,14 +53,14 @@ export default function() {
         .attr("width", function() { var l = local(this); return l.extent[1][0] - l.extent[0][0]; })
         .attr("height", function() { var l = local(this); return l.extent[1][1] - l.extent[0][1]; });
 
-    selection.selectAll(".selection")
+    group.selectAll(".selection")
       .data([{type: "selection"}])
       .enter().append("rect")
         .attr("class", "selection")
         .attr("cursor", cursors.selection)
         .attr("fill", "rgba(0,0,0,0.15)");
 
-    var resize = selection.selectAll(".resize")
+    var resize = group.selectAll(".resize")
       .data(resizes.map(function(t) { return {type: t}; }), function(d) { return d.type; });
 
     resize.exit().remove();
@@ -72,61 +70,73 @@ export default function() {
         .attr("cursor", function(d) { return cursors[d.type]; })
         .attr("fill", "none");
 
-    selection
-        .call(redraw)
+    group
+        .each(redraw)
         .attr("pointer-events", "all")
         .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
         .on("mousedown.brush", mousedowned);
   }
 
-  // TODO selection as transition
-  brush.move = function(selection, selected) {
-    selection
+  // TODO transitions
+  brush.move = function(group, selected) {
+    group
         .interrupt()
         .each(typeof selected === "function"
             ? function() { this.__brush.selected = selected.apply(this, arguments); }
             : function() { this.__brush.selected = selected; })
-        .call(redraw)
-        .call(emit, "start")
-        .call(emit, "brush")
-        .call(emit, "end");
+        .each(redraw)
+        .each(function() { emitter(this, arguments)("start")("brush")("end"); });
   };
 
-  function redraw(selection) {
-    selection.selectAll(".selection")
-        .style("display", function() { var l = local(this); return l.selected == null ? "none" : null; })
-      .filter(function() { var l = local(this); return l.selected != null; })
-        .attr("x", function() { var l = local(this); return l.selected[0][0]; })
-        .attr("y", function() { var l = local(this); return l.selected[0][1]; })
-        .attr("width", function() { var l = local(this); return l.selected[1][0] - l.selected[0][0]; })
-        .attr("height", function() { var l = local(this); return l.selected[1][1] - l.selected[0][1]; });
+  function redraw() {
+    var group = select(this),
+        l = local(this);
 
-    selection.selectAll(".resize")
-        .style("display", function() { var l = local(this); return l.selected == null ? "none" : null; })
-      .filter(function() { var l = local(this); return l.selected != null; })
-        .attr("x", function(d) { var l = local(this); return d.type[d.type.length - 1] === "e" ? l.selected[1][0] - 3 : l.selected[0][0] - 3; })
-        .attr("y", function(d) { var l = local(this); return d.type[0] === "s" ? l.selected[1][1] - 3 : l.selected[0][1] - 3; })
-        .attr("width", function(d) { var l = local(this); return d.type === "n" || d.type === "s" ? l.selected[1][0] - l.selected[0][0] + 6 : 6; })
-        .attr("height", function(d) { var l = local(this); return d.type === "e" || d.type === "w" ? l.selected[1][1] - l.selected[0][1] + 6 : 6; });
+    if (l.selected) {
+      group.selectAll(".selection")
+          .style("display", null)
+          .attr("x", l.selected[0][0])
+          .attr("y", l.selected[0][1])
+          .attr("width", l.selected[1][0] - l.selected[0][0])
+          .attr("height", l.selected[1][1] - l.selected[0][1]);
+
+      group.selectAll(".resize")
+          .style("display", null)
+          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? l.selected[1][0] - 3 : l.selected[0][0] - 3; })
+          .attr("y", function(d) { return d.type[0] === "s" ? l.selected[1][1] - 3 : l.selected[0][1] - 3; })
+          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? l.selected[1][0] - l.selected[0][0] + 6 : 6; })
+          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? l.selected[1][1] - l.selected[0][1] + 6 : 6; });
+    }
+
+    else {
+      group.selectAll(".selection,.resize")
+          .style("display", "none")
+          .attr("x", null)
+          .attr("y", null)
+          .attr("width", null)
+          .attr("height", null);
+    }
   }
 
-  function emit(selection, type) {
-    selection.each(function() {
-      customEvent(new BrushEvent(brush, type, this.__brush), listeners.apply, listeners, [type, this, arguments]);
-    });
+  function emitter(that, args) {
+    return function emit(type) {
+      customEvent(new BrushEvent(brush, type, that.__brush), listeners.apply, listeners, [type, that, args]);
+      return emit;
+    };
   }
 
   function mousedowned() {
     var that = this,
-        selection = select(that),
+        group = select(that),
         data = event.target.__data__,
         type = data.type,
         l = local(that),
-        // center,
-        // offset,
-        origin = mouse(that);
-
-    console.log("mousedown");
+        x0 = l.selected[0][0],
+        y0 = l.selected[0][1],
+        x1 = l.selected[1][0],
+        y1 = l.selected[1][1],
+        origin = mouse(that),
+        emit = emitter(that, arguments);
 
     select(event.view)
         .on("keydown.brush", keydowned, true)
@@ -135,49 +145,33 @@ export default function() {
         .on("mouseup.brush", mouseupped, true);
 
     dragDisable(event.view);
-    selection.interrupt().selectAll("*").interrupt();
-    selection.selectAll(".background").attr("cursor", cursors[type]);
-    selection.attr("pointer-events", "none");
-
-    switch (type) {
-      case "selection": {
-        origin[0] = l.selected[0][0] - origin[0];
-        origin[1] = l.selected[0][1] - origin[1];
-        break;
-      }
-
-      case "n":
-      case "e":
-      case "s":
-      case "w":
-      case "nw":
-      case "ne":
-      case "se":
-      case "sw": {
-        var i = type[type.length - 1] === "w", j = type[0] === "n";
-        // offset = [l.selected[1 - i][0] - origin[0], l.selected[1 - j][1] - origin[1]];
-        origin[0] = l.selected[+i][0];
-        origin[1] = l.selected[+j][1];
-        break;
-      }
-
-      // If the ALT key is down when starting a brush, center at the mouse.
-      case "background": {
-        // if (event.altKey) center = origin.slice();
-        break;
-      }
-    }
+    group.interrupt().selectAll("*").interrupt();
+    group.attr("pointer-events", "none").selectAll(".background").attr("cursor", cursors[type]);
+    emit("start");
 
     function mousemoved() {
-      console.log("mousemove", type);
+      var point = mouse(that),
+          dx = point[0] - origin[0],
+          dy = point[1] - origin[1];
+
+      switch (type) {
+        case "selection": {
+          l.selected[0][0] = x0 + dx;
+          l.selected[0][1] = y0 + dy;
+          l.selected[1][0] = x1 + dx;
+          l.selected[1][1] = y1 + dy;
+          redraw.call(that);
+          emit("brush");
+          break;
+        }
+      }
     }
 
     function mouseupped() {
-      console.log("mouseup");
       dragEnable(event.view);
-      selection.selectAll(".background").attr("cursor", cursors.background);
-      selection.attr("pointer-events", "all");
+      group.attr("pointer-events", "all").selectAll(".background").attr("cursor", cursors.background);
       select(event.view).on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
+      emit("end");
     }
 
     function keydowned() {
@@ -206,7 +200,7 @@ export default function() {
     }
   }
 
-  function initialLocal() {
+  function initialize() {
     var local = this.__brush || {selected: null};
     local.extent = extent.apply(this, arguments);
     return local;

@@ -120,22 +120,22 @@ export default function() {
 
   function redraw() {
     var group = select(this),
-        l = local(this);
+        selected = local(this).selected;
 
-    if (l.selected) {
+    if (selected) {
       group.selectAll(".selection")
           .style("display", null)
-          .attr("x", l.selected[0][0])
-          .attr("y", l.selected[0][1])
-          .attr("width", l.selected[1][0] - l.selected[0][0])
-          .attr("height", l.selected[1][1] - l.selected[0][1]);
+          .attr("x", selected[0][0])
+          .attr("y", selected[0][1])
+          .attr("width", selected[1][0] - selected[0][0])
+          .attr("height", selected[1][1] - selected[0][1]);
 
       group.selectAll(".resize")
           .style("display", null)
-          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? l.selected[1][0] - 3 : l.selected[0][0] - 3; })
-          .attr("y", function(d) { return d.type[0] === "s" ? l.selected[1][1] - 3 : l.selected[0][1] - 3; })
-          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? l.selected[1][0] - l.selected[0][0] + 6 : 6; })
-          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? l.selected[1][1] - l.selected[0][1] + 6 : 6; });
+          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? selected[1][0] - 3 : selected[0][0] - 3; })
+          .attr("y", function(d) { return d.type[0] === "s" ? selected[1][1] - 3 : selected[0][1] - 3; })
+          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? selected[1][0] - selected[0][0] + 6 : 6; })
+          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? selected[1][1] - selected[0][1] + 6 : 6; });
     }
 
     else {
@@ -163,17 +163,19 @@ export default function() {
         modeX0,
         modeY0,
         l = local(that),
-        w = l.selected[0][0],
-        n = l.selected[0][1],
-        e = l.selected[1][0],
-        s = l.selected[1][1],
+        extent = l.extent,
+        selected = l.selected,
+        w = selected[0][0],
+        n = selected[0][1],
+        e = selected[1][0],
+        s = selected[1][1],
         point0 = mouse(that),
         point,
         emit = emitter(that, arguments);
 
     if (type === "background") {
-      w = e = l.selected[0][0] = l.selected[1][0] = point0[0];
-      n = s = l.selected[0][1] = l.selected[1][1] = point0[1];
+      w = e = selected[0][0] = selected[1][0] = point0[0];
+      n = s = selected[0][1] = selected[1][1] = point0[1];
     }
 
     var view = select(event.view)
@@ -205,7 +207,7 @@ export default function() {
 
       switch (modeX) {
         case MODE_DRAG: {
-          dx = Math.max(l.extent[0][0] - w, Math.min(l.extent[1][0] - e, dx));
+          dx = Math.max(extent[0][0] - w, Math.min(extent[1][0] - e, dx));
           w1 = w + dx;
           e1 = e + dx;
           break;
@@ -234,7 +236,7 @@ export default function() {
 
       switch (modeY) {
         case MODE_DRAG: {
-          dy = Math.max(l.extent[0][1] - n, Math.min(l.extent[1][1] - s, dy));
+          dy = Math.max(extent[0][1] - n, Math.min(extent[1][1] - s, dy));
           n1 = n + dy;
           s1 = s + dy;
           break;
@@ -261,14 +263,14 @@ export default function() {
         }
       }
 
-      if (l.selected[0][0] !== w1
-          || l.selected[0][1] !== e1
-          || l.selected[1][0] !== s1
-          || l.selected[1][1] !== n1) {
-        l.selected[0][0] = w1;
-        l.selected[0][1] = n1;
-        l.selected[1][0] = e1;
-        l.selected[1][1] = s1;
+      if (selected[0][0] !== w1
+          || selected[0][1] !== e1
+          || selected[1][0] !== s1
+          || selected[1][1] !== n1) {
+        selected[0][0] = w1;
+        selected[0][1] = n1;
+        selected[1][0] = e1;
+        selected[1][1] = s1;
         redraw.call(that);
         emit("brush");
       }
@@ -286,14 +288,14 @@ export default function() {
       if (event.keyCode == 32) {
         if (modeX === MODE_E || modeX === MODE_W) {
           modeX0 = modeX, modeX = MODE_DRAG;
-          w = l.selected[0][0];
-          e = l.selected[1][0];
+          w = selected[0][0];
+          e = selected[1][0];
           point0[0] = point[0];
         }
         if (modeY === MODE_N || modeY === MODE_S) {
           modeY0 = modeY, modeY = MODE_DRAG;
-          n = l.selected[0][1];
-          s = l.selected[1][1];
+          n = selected[0][1];
+          s = selected[1][1];
           point0[1] = point[1];
         }
         event.preventDefault();
@@ -305,14 +307,14 @@ export default function() {
       if (event.keyCode == 32) {
         if (modeX0) {
           modeX = modeX0, modeX0 = null;
-          w = l.selected[0][0];
-          e = l.selected[1][0];
+          w = selected[0][0];
+          e = selected[1][0];
           point0[0] = point[0];
         }
         if (modeY0) {
           modeY = modeY0, modeY0 = null;
-          n = l.selected[0][1];
-          s = l.selected[1][1];
+          n = selected[0][1];
+          s = selected[1][1];
           point0[1] = point[1];
         }
         event.preventDefault();
@@ -321,11 +323,11 @@ export default function() {
     }
 
     function clampX(x) {
-      return Math.min(l.extent[1][0], Math.max(l.extent[0][0], x));
+      return Math.min(extent[1][0], Math.max(extent[0][0], x));
     }
 
     function clampY(y) {
-      return Math.min(l.extent[1][1], Math.max(l.extent[0][1], y));
+      return Math.min(extent[1][1], Math.max(extent[0][1], y));
     }
   }
 

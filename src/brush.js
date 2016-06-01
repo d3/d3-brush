@@ -2,6 +2,7 @@ import {dispatch} from "d3-dispatch";
 import {dragDisable, dragEnable} from "d3-drag";
 import {interpolate} from "d3-interpolate";
 import {customEvent, mouse, select} from "d3-selection";
+import {interrupt} from "d3-transition";
 import constant from "./constant";
 import BrushEvent from "./event";
 
@@ -169,8 +170,8 @@ function brush(dim) {
   brush.move = function(group, selection) {
     if (group.selection) {
       group
-          .on("start.brush", function() { emitter(this, arguments)("start"); })
-          .on("interrupt.brush end.brush", function() { emitter(this, arguments)("end"); })
+          .on("start.brush", function() { emitter(this, arguments).beforestart().start(); })
+          .on("interrupt.brush end.brush", function() { emitter(this, arguments).end(); })
           .tween("brush", function() {
             var that = this,
                 state = that.__brush,
@@ -182,19 +183,24 @@ function brush(dim) {
             function tween(t) {
               state.selection = i(t);
               redraw.call(that);
-              emit("brush");
+              emit.brush();
             }
 
             return selection0 && selection1 ? tween : tween(1);
           });
     } else {
       group
-          .interrupt()
-          .each(typeof selection === "function"
-              ? function() { var state = this.__brush; state.selection = dim.input(selection.apply(this, arguments), state.extent); }
-              : function() { var state = this.__brush; state.selection = dim.input(selection, state.extent); })
-          .each(redraw)
-          .each(function() { emitter(this, arguments)("start")("brush")("end"); });
+          .each(function() {
+            var that = this,
+                args = arguments,
+                emit = emitter(that, args).beforestart(),
+                state = that.__brush;
+
+            interrupt(that);
+            state.selection = dim.input(typeof selection === "function" ? selection.apply(that, args) : selection, state.extent);
+            redraw.call(that);
+            emit.start().brush().end();
+          });
     }
   };
 
@@ -229,11 +235,37 @@ function brush(dim) {
   }
 
   function emitter(that, args) {
-    return function emit(type) {
-      customEvent(new BrushEvent(brush, type, dim.output(that.__brush.selection)), listeners.apply, listeners, [type, that, args]);
-      return emit;
-    };
+    return that.__brush.emitter || new Emitter(that, args);
   }
+
+  function Emitter(that, args) {
+    this.that = that;
+    this.args = args;
+    this.state = that.__brush;
+    this.active = 0;
+  }
+
+  Emitter.prototype = {
+    beforestart: function() {
+      if (++this.active === 1) this.state.emitter = this, this.starting = true;
+      return this;
+    },
+    start: function() {
+      if (this.starting) this.starting = false, this.emit("start");
+      return this;
+    },
+    brush: function() {
+      this.emit("brush");
+      return this;
+    },
+    end: function() {
+      if (--this.active === 0) delete this.state.emitter, this.emit("end");
+      return this;
+    },
+    emit: function(type) {
+      customEvent(new BrushEvent(brush, type, dim.output(this.state.selection)), listeners.apply, listeners, [type, this.that, this.args]);
+    }
+  };
 
   function mousedowned() {
     var that = this,
@@ -251,7 +283,7 @@ function brush(dim) {
         dx, dy,
         point0 = mouse(that),
         point,
-        emit = emitter(that, arguments);
+        emit = emitter(that, arguments).beforestart();
 
     if (type === "background") {
       state.selection = selection = [
@@ -283,15 +315,15 @@ function brush(dim) {
         .on("mouseup.brush", mouseupped, true);
 
     var group = select(that)
-        .interrupt()
         .attr("pointer-events", "none");
 
     var background = group.selectAll(".background")
         .attr("cursor", cursors[type]);
 
+    interrupt(that);
     dragDisable(event.view);
     redraw.call(that);
-    emit("start");
+    emit.start();
 
     function mousemoved() {
       point = mouse(that);
@@ -348,7 +380,7 @@ function brush(dim) {
         selection[1][0] = e1;
         selection[1][1] = s1;
         redraw.call(that);
-        emit("brush");
+        emit.brush();
       }
     }
 
@@ -358,7 +390,7 @@ function brush(dim) {
       background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
       if (w1 === e1 || n1 === s1) state.selection = null, redraw.call(that);
-      emit("end");
+      emit.end();
     }
 
     function keydowned() {

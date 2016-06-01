@@ -187,10 +187,10 @@ export default function() {
         l = local(that),
         extent = l.extent,
         selected = l.selected,
-        W = extent[0][0], w0, w1 = w0,
-        N = extent[0][1], n0, n1 = n0,
-        E = extent[1][0], e0, e1 = e0,
-        S = extent[1][1], s0, s1 = s0,
+        W = extent[0][0], w0, w1,
+        N = extent[0][1], n0, n1,
+        E = extent[1][0], e0, e1,
+        S = extent[1][1], s0, s1,
         dx, dy,
         point0 = mouse(that),
         point,
@@ -204,6 +204,11 @@ export default function() {
       e0 = selected[1][0];
       s0 = selected[1][1];
     }
+
+    w1 = w0;
+    n1 = n0;
+    e1 = e0;
+    s1 = s0;
 
     var view = select(event.view)
         .on("keydown.brush", keydowned, true)

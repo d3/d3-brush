@@ -4,11 +4,11 @@ import {customEvent, mouse, select} from "d3-selection";
 import constant from "./constant";
 import BrushEvent from "./event";
 
-var MODE_DRAG = {},
-    MODE_N = {},
-    MODE_S = {},
-    MODE_E = {},
-    MODE_W = {},
+var DRAG = {},
+    CENTER_NW = {},
+    CENTER_SE = {},
+    MOVE_NW = {},
+    MOVE_SE = {},
     N = "n", E = "e", S = "s", W = "w", NW = "nw", NE = "ne", SE = "se", SW = "sw",
     // resizesX = [E, W],
     // resizesY = [N, S],
@@ -28,29 +28,29 @@ var cursors = {
 };
 
 var modeXs = {
-  background: MODE_W,
-  selection: MODE_DRAG,
+  background: MOVE_NW,
+  selection: DRAG,
   n: null,
-  e: MODE_E,
+  e: MOVE_SE,
   s: null,
-  w: MODE_W,
-  nw: MODE_W,
-  ne: MODE_E,
-  se: MODE_E,
-  sw: MODE_W
+  w: MOVE_NW,
+  nw: MOVE_NW,
+  ne: MOVE_SE,
+  se: MOVE_SE,
+  sw: MOVE_NW
 };
 
 var modeYs = {
-  background: MODE_N,
-  selection: MODE_DRAG,
-  n: MODE_N,
+  background: MOVE_NW,
+  selection: DRAG,
+  n: MOVE_NW,
   e: null,
-  s: MODE_S,
+  s: MOVE_SE,
   w: null,
-  nw: MODE_N,
-  ne: MODE_N,
-  se: MODE_S,
-  sw: MODE_S
+  nw: MOVE_NW,
+  ne: MOVE_NW,
+  se: MOVE_SE,
+  sw: MOVE_SE
 };
 
 function defaultExtent() {
@@ -201,20 +201,32 @@ export default function() {
     function mousemoved() {
       point = mouse(that);
 
-      var w1 = w, n1 = n, e1 = e, s1 = s,
+      var w1 = w, n1 = n, e1 = e, s1 = s, t,
           dx = point[0] - point0[0],
           dy = point[1] - point0[1];
 
       switch (modeX) {
-        case MODE_DRAG: {
+        case DRAG: {
           dx = Math.max(extent[0][0] - w, Math.min(extent[1][0] - e, dx));
           w1 = w + dx;
           e1 = e + dx;
           break;
         }
-        case MODE_W: {
+        case CENTER_NW: {
+          if (e - dx < w + dx) t = w, w = e, e = t, modeX = CENTER_SE, modeX0 = MOVE_SE, dx *= -1;
+          w1 = clampX(w + dx);
+          e1 = clampX(e - dx);
+          break;
+        }
+        case CENTER_SE: {
+          if (e + dx < w - dx) t = w, w = e, e = t, modeX = CENTER_NW, modeX0 = MOVE_NW, dx *= -1;
+          w1 = clampX(w - dx);
+          e1 = clampX(e + dx);
+          break;
+        }
+        case MOVE_NW: {
           if (w + dx > e) {
-            modeX = w, w = e, e = modeX, modeX = MODE_E;
+            t = w, w = e, e = t, modeX = MOVE_SE;
             w1 = w;
             e1 = clampX(e + dx);
           } else {
@@ -222,9 +234,9 @@ export default function() {
           }
           break;
         }
-        case MODE_E: {
+        case MOVE_SE: {
           if (e + dx < w) {
-            modeX = w, w = e, e = modeX, modeX = MODE_W;
+            t = w, w = e, e = t, modeX = MOVE_NW;
             w1 = clampX(w + dx);
             e1 = e;
           } else {
@@ -235,15 +247,27 @@ export default function() {
       }
 
       switch (modeY) {
-        case MODE_DRAG: {
+        case DRAG: {
           dy = Math.max(extent[0][1] - n, Math.min(extent[1][1] - s, dy));
           n1 = n + dy;
           s1 = s + dy;
           break;
         }
-        case MODE_N: {
+        case CENTER_NW: {
+          if (s - dy < n + dy) t = n, n = s, s = t, modeY = CENTER_SE, modeY0 = MOVE_SE, dy *= -1;
+          n1 = clampY(n + dy);
+          s1 = clampY(s - dy);
+          break;
+        }
+        case CENTER_SE: {
+          if (s + dy < n - dy) t = n, n = s, s = t, modeY = CENTER_NW, modeY0 = MOVE_NW, dy *= -1;
+          n1 = clampY(n - dy);
+          s1 = clampY(s + dy);
+          break;
+        }
+        case MOVE_NW: {
           if (n + dy > s) {
-            modeY = n, n = s, s = modeY, modeY = MODE_S;
+            t = n, n = s, s = t, modeY = MOVE_SE;
             n1 = n;
             s1 = clampY(s + dy);
           } else {
@@ -251,9 +275,9 @@ export default function() {
           }
           break;
         }
-        case MODE_S: {
+        case MOVE_SE: {
           if (s + dy < n) {
-            modeY = n, n = s, s = modeY, modeY = MODE_N;
+            t = n, n = s, s = t, modeY = MOVE_NW;
             n1 = clampY(n + dy);
             s1 = s;
           } else {
@@ -284,42 +308,59 @@ export default function() {
       emit("end");
     }
 
+    // TODO what happens if you have both ALT and SPACE?
     function keydowned() {
-      if (event.keyCode == 32) {
-        if (modeX === MODE_E || modeX === MODE_W) {
-          modeX0 = modeX, modeX = MODE_DRAG;
-          w = selected[0][0];
-          e = selected[1][0];
-          point0[0] = point[0];
+      switch (event.keyCode) {
+        case 18: // ALT
+        case 32: { // SPACE
+          if (modeX === MOVE_SE || modeX === MOVE_NW) {
+            modeX0 = modeX, modeX = event.keyCode === 18 ? (modeX === MOVE_SE ? CENTER_SE : CENTER_NW) : DRAG;
+            w = selected[0][0];
+            e = selected[1][0];
+            point0[0] = point[0];
+          }
+          if (modeY === MOVE_SE || modeY === MOVE_NW) {
+            modeY0 = modeY, modeY = event.keyCode === 18 ? (modeY === MOVE_SE ? CENTER_SE : CENTER_NW) : DRAG;
+            n = selected[0][1];
+            s = selected[1][1];
+            point0[1] = point[1];
+          }
+          break;
         }
-        if (modeY === MODE_N || modeY === MODE_S) {
-          modeY0 = modeY, modeY = MODE_DRAG;
-          n = selected[0][1];
-          s = selected[1][1];
-          point0[1] = point[1];
+        case 16: { // SHIFT
+          break;
         }
-        event.preventDefault();
-        event.stopPropagation();
+        default: return;
       }
+      event.preventDefault();
+      event.stopPropagation();
     }
 
     function keyupped() {
-      if (event.keyCode == 32) {
-        if (modeX0) {
-          modeX = modeX0, modeX0 = null;
-          w = selected[0][0];
-          e = selected[1][0];
-          point0[0] = point[0];
+      switch (event.keyCode) {
+        case 18: // ALT
+        case 32: { // SPACE
+          if (modeX0) {
+            modeX = modeX0, modeX0 = null;
+            w = selected[0][0];
+            e = selected[1][0];
+            point0[0] = point[0];
+          }
+          if (modeY0) {
+            modeY = modeY0, modeY0 = null;
+            n = selected[0][1];
+            s = selected[1][1];
+            point0[1] = point[1];
+          }
+          break;
         }
-        if (modeY0) {
-          modeY = modeY0, modeY0 = null;
-          n = selected[0][1];
-          s = selected[1][1];
-          point0[1] = point[1];
+        case 16: { // SHIFT
+          break;
         }
-        event.preventDefault();
-        event.stopPropagation();
+        default: return;
       }
+      event.preventDefault();
+      event.stopPropagation();
     }
 
     function clampX(x) {

@@ -169,17 +169,18 @@ export default function() {
         l = local(that),
         extent = l.extent,
         selected = l.selected,
-        w = selected[0][0],
-        n = selected[0][1],
-        e = selected[1][0],
-        s = selected[1][1],
+        W = extent[0][0], w0 = selected[0][0], w1 = w0,
+        N = extent[0][1], n0 = selected[0][1], n1 = n0,
+        E = extent[1][0], e0 = selected[1][0], e1 = e0,
+        S = extent[1][1], s0 = selected[1][1], s1 = s0,
+        dx, dy,
         point0 = mouse(that),
         point,
         emit = emitter(that, arguments);
 
     if (type === "background") {
-      w = e = selected[0][0] = selected[1][0] = point0[0];
-      n = s = selected[0][1] = selected[1][1] = point0[1];
+      w0 = e0 = selected[0][0] = selected[1][0] = point0[0];
+      n0 = s0 = selected[0][1] = selected[1][1] = point0[1];
     }
 
     var view = select(event.view)
@@ -204,33 +205,39 @@ export default function() {
 
     function mousemoved() {
       point = mouse(that);
+      moved();
+    }
 
-      var w1 = w, n1 = n, e1 = e, s1 = s, t,
-          dx = point[0] - point0[0],
-          dy = point[1] - point0[1];
+    function moved() {
+      var t;
+
+      dx = point[0] - point0[0];
+      dy = point[1] - point0[1];
 
       switch (mode) {
         case MODE_SPACE:
         case MODE_DRAG: {
-          if (signX) dx = Math.max(extent[0][0] - w, Math.min(extent[1][0] - e, dx)), w1 = w + dx, e1 = e + dx;
-          if (signY) dy = Math.max(extent[0][1] - n, Math.min(extent[1][1] - s, dy)), n1 = n + dy, s1 = s + dy;
+          if (signX) dx = Math.max(W - w0, Math.min(E - e0, dx)), w1 = w0 + dx, e1 = e0 + dx;
+          if (signY) dy = Math.max(N - n0, Math.min(S - s0, dy)), n1 = n0 + dy, s1 = s0 + dy;
           break;
         }
         case MODE_RESIZE: {
-          if (signX < 0) w1 = clampX(w + dx); else if (signX > 0) e1 = clampX(e + dx);
-          if (signY < 0) n1 = clampY(n + dy); else if (signY > 0) s1 = clampY(s + dy);
+          if (signX < 0) dx = Math.max(W - w0, Math.min(E - w0, dx)), w1 = w0 + dx, e1 = e0;
+          else if (signX > 0) dx = Math.max(W - e0, Math.min(E - e0, dx)), w1 = w0, e1 = e0 + dx;
+          if (signY < 0) dy = Math.max(N - n0, Math.min(S - n0, dy)), n1 = n0 + dy, s1 = s0;
+          else if (signY > 0) dy = Math.max(N - s0, Math.min(S - s0, dy)), n1 = n0, s1 = s0 + dy;
           break;
         }
         case MODE_CENTER: {
-          if (signX) dx *= signX, w1 = clampX(w - dx), e1 = clampX(e + dx);
-          if (signY) dy *= signY, n1 = clampY(n - dy), s1 = clampY(s + dy);
+          if (signX) dx *= signX, w1 = Math.max(W, Math.min(E, w0 - dx)), e1 = Math.max(W, Math.min(E, e0 + dx));
+          if (signY) dy *= signY, n1 = Math.max(N, Math.min(S, n0 - dy)), s1 = Math.max(N, Math.min(S, s0 + dy));
           break;
         }
       }
 
       // TODO update the background cursor when flipping!
-      if (e1 < w1) signX *= -1, t = w, w = e, e = t, t = w1, w1 = e1, e1 = t;
-      if (s1 < n1) signY *= -1, t = n, n = s, s = t, t = n1, n1 = s1, s1 = t;
+      if (e1 < w1) t = w0, w0 = e0, e0 = t, t = w1, w1 = e1, e1 = t, signX *= -1;
+      if (s1 < n1) t = n0, n0 = s0, s0 = t, t = n1, n1 = s1, s1 = t, signY *= -1;
 
       if (selected[0][0] !== w1
           || selected[0][1] !== e1
@@ -255,16 +262,13 @@ export default function() {
 
     function keydowned() {
       switch (event.keyCode) {
-        case 18: // ALT
+        // case 18: // ALT
         case 32: { // SPACE
           if (mode === MODE_RESIZE) {
-            mode = event.keyCode === 18 ? MODE_CENTER : MODE_SPACE;
-            w = selected[0][0];
-            n = selected[0][1];
-            e = selected[1][0];
-            s = selected[1][1];
-            point0[0] = point[0];
-            point0[1] = point[1];
+            if (signX > 0) w0 = w1 - dx; else if (signX < 0) e0 = e1 - dx;
+            if (signY > 0) n0 = n1 - dy; else if (signY < 0) s0 = s1 - dy;
+            mode = MODE_SPACE;
+            moved();
           }
           break;
         }
@@ -277,20 +281,16 @@ export default function() {
       event.stopPropagation();
     }
 
-    // TODO what happens if you have both ALT and SPACE?
-    // TODO this doesn’t work correctly if the selected extent is clamped :(
+    // TODO ALT, ALT and SPACE?
     function keyupped() {
       switch (event.keyCode) {
-        case 18: // ALT
+        // case 18: // ALT
         case 32: { // SPACE
-          if (mode === MODE_CENTER || mode === MODE_SPACE) {
+          if (mode === MODE_SPACE) {
+            if (signX > 0) w0 = w1; else if (signX < 0) e0 = e1;
+            if (signY > 0) n0 = n1; else if (signY < 0) s0 = s1;
             mode = MODE_RESIZE;
-            w = selected[0][0];
-            n = selected[0][1];
-            e = selected[1][0];
-            s = selected[1][1];
-            point0[0] = point[0];
-            point0[1] = point[1];
+            moved();
           }
           break;
         }
@@ -301,14 +301,6 @@ export default function() {
       }
       event.preventDefault();
       event.stopPropagation();
-    }
-
-    function clampX(x) {
-      return Math.min(extent[1][0], Math.max(extent[0][0], x));
-    }
-
-    function clampY(y) {
-      return Math.min(extent[1][1], Math.max(extent[0][1], y));
     }
   }
 

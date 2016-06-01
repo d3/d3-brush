@@ -131,34 +131,34 @@ export default function() {
   }
 
   // TODO transitions
-  brush.move = function(group, selected) {
+  brush.move = function(group, selection) {
     group
         .interrupt()
-        .each(typeof selected === "function"
-            ? function() { this.__brush.selected = selected.apply(this, arguments); }
-            : function() { this.__brush.selected = selected; })
+        .each(typeof selection === "function"
+            ? function() { this.__brush.selection = selection.apply(this, arguments); }
+            : function() { this.__brush.selection = selection; })
         .each(redraw)
         .each(function() { emitter(this, arguments)("start")("brush")("end"); });
   };
 
   function redraw() {
     var group = select(this),
-        selected = local(this).selected;
+        selection = local(this).selection;
 
-    if (selected) {
+    if (selection) {
       group.selectAll(".selection")
           .style("display", null)
-          .attr("x", selected[0][0])
-          .attr("y", selected[0][1])
-          .attr("width", selected[1][0] - selected[0][0])
-          .attr("height", selected[1][1] - selected[0][1]);
+          .attr("x", selection[0][0])
+          .attr("y", selection[0][1])
+          .attr("width", selection[1][0] - selection[0][0])
+          .attr("height", selection[1][1] - selection[0][1]);
 
       group.selectAll(".resize")
           .style("display", null)
-          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? selected[1][0] - 3 : selected[0][0] - 3; })
-          .attr("y", function(d) { return d.type[0] === "s" ? selected[1][1] - 3 : selected[0][1] - 3; })
-          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? selected[1][0] - selected[0][0] + 6 : 6; })
-          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? selected[1][1] - selected[0][1] + 6 : 6; });
+          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? selection[1][0] - 3 : selection[0][0] - 3; })
+          .attr("y", function(d) { return d.type[0] === "s" ? selection[1][1] - 3 : selection[0][1] - 3; })
+          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? selection[1][0] - selection[0][0] + 6 : 6; })
+          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? selection[1][1] - selection[0][1] + 6 : 6; });
     }
 
     else {
@@ -186,7 +186,7 @@ export default function() {
         signY = signsY[type],
         l = local(that),
         extent = l.extent,
-        selected = l.selected,
+        selection = l.selection,
         W = extent[0][0], w0, w1,
         N = extent[0][1], n0, n1,
         E = extent[1][0], e0, e1,
@@ -197,12 +197,12 @@ export default function() {
         emit = emitter(that, arguments);
 
     if (type === "background") {
-      l.selected = selected = [[w0 = point0[0], n0 = point0[1]], [e0 = w0, s0 = n0]];
+      l.selection = selection = [[w0 = point0[0], n0 = point0[1]], [e0 = w0, s0 = n0]];
     } else {
-      w0 = selected[0][0];
-      n0 = selected[0][1];
-      e0 = selected[1][0];
-      s0 = selected[1][1];
+      w0 = selection[0][0];
+      n0 = selection[0][1];
+      e0 = selection[1][0];
+      s0 = selection[1][1];
     }
 
     w1 = w0;
@@ -276,14 +276,14 @@ export default function() {
         if (type in flipY) background.attr("cursor", cursors[type = flipY[type]]);
       }
 
-      if (selected[0][0] !== w1
-          || selected[0][1] !== e1
-          || selected[1][0] !== s1
-          || selected[1][1] !== n1) {
-        selected[0][0] = w1;
-        selected[0][1] = n1;
-        selected[1][0] = e1;
-        selected[1][1] = s1;
+      if (selection[0][0] !== w1
+          || selection[0][1] !== e1
+          || selection[1][0] !== s1
+          || selection[1][1] !== n1) {
+        selection[0][0] = w1;
+        selection[0][1] = n1;
+        selection[1][0] = e1;
+        selection[1][1] = s1;
         redraw.call(that);
         emit("brush");
       }
@@ -294,7 +294,7 @@ export default function() {
       group.attr("pointer-events", "all");
       background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
-      if (w1 === e1 || n1 === s1) l.selected = null, redraw.call(that);
+      if (w1 === e1 || n1 === s1) l.selection = null, redraw.call(that);
       emit("end");
     }
 
@@ -366,7 +366,7 @@ export default function() {
   }
 
   function initialize() {
-    var local = this.__brush || {selected: null};
+    var local = this.__brush || {selection: null};
     local.extent = extent.apply(this, arguments);
     return local;
   }

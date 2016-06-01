@@ -247,8 +247,8 @@ export default function() {
           break;
         }
         case MODE_CENTER: {
-          if (signX) dx *= signX, w1 = Math.max(W, Math.min(E, w0 - dx)), e1 = Math.max(W, Math.min(E, e0 + dx));
-          if (signY) dy *= signY, n1 = Math.max(N, Math.min(S, n0 - dy)), s1 = Math.max(N, Math.min(S, s0 + dy));
+          if (signX) w1 = Math.max(W, Math.min(E, w0 - dx * signX)), e1 = Math.max(W, Math.min(E, e0 + dx * signX));
+          if (signY) n1 = Math.max(N, Math.min(S, n0 - dy * signY)), s1 = Math.max(N, Math.min(S, s0 + dy * signY));
           break;
         }
       }

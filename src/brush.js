@@ -7,11 +7,28 @@ import BrushEvent from "./event";
 var MODE_DRAG = {name: "drag"},
     MODE_SPACE = {name: "space"},
     MODE_RESIZE = {name: "resize"},
-    MODE_CENTER = {name: "center"},
-    N = "n", E = "e", S = "s", W = "w", NW = "nw", NE = "ne", SE = "se", SW = "sw",
-    // resizesX = [E, W],
-    // resizesY = [N, S],
-    resizesXY = [N, E, S, W, NW, NE, SE, SW];
+    MODE_CENTER = {name: "center"};
+
+var X = {
+  name: "x",
+  resize: ["e", "w"].map(type),
+  input: function(x) { return x && [[x[0], NaN], [x[1], NaN]]; },
+  output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }
+};
+
+var Y = {
+  name: "y",
+  resize: ["n", "s"].map(type),
+  input: function(y) { return y && [[NaN, y[0]], [NaN, y[1]]]; },
+  output: function(xy) { return xy && [xy[0][1], xy[1][1]]; }
+};
+
+var XY = {
+  name: "xy",
+  resize: ["n", "e", "s", "w", "nw", "ne", "se", "sw"].map(type),
+  input: function(xy) { return xy; },
+  output: function(xy) { return xy; }
+};
 
 var cursors = {
   background: "crosshair",
@@ -70,6 +87,10 @@ var signsY = {
   sw: +1
 };
 
+function type(t) {
+  return {type: t};
+}
+
 function defaultExtent() {
   var svg = this.ownerSVGElement;
   return [[0, 0], svg
@@ -83,17 +104,27 @@ function local(node) {
   return node.__brush;
 }
 
-export default function() {
-  var extent = defaultExtent,
-      listeners = dispatch(brush, "start", "brush", "end"),
-      resizes = resizesXY;
+export function brushX() {
+  return brush(X);
+}
 
-  // TODO tell the brush whether you can brush in x, y or x and y?
+export function brushY() {
+  return brush(Y);
+}
+
+export default function() {
+  return brush(XY);
+}
+
+function brush(dim) {
+  var extent = defaultExtent,
+      listeners = dispatch(brush, "start", "brush", "end");
+
   function brush(group) {
     var background = group
         .property("__brush", initialize)
       .selectAll(".background")
-      .data([{type: "background"}]);
+      .data([type("background")]);
 
     background.enter().append("rect")
         .attr("class", "background")
@@ -107,14 +138,14 @@ export default function() {
         .attr("height", function() { var l = local(this); return l.extent[1][1] - l.extent[0][1]; });
 
     group.selectAll(".selection")
-      .data([{type: "selection"}])
+      .data([type("selection")])
       .enter().append("rect")
         .attr("class", "selection")
         .attr("cursor", cursors.selection)
         .attr("fill", "rgba(0,0,0,0.15)");
 
     var resize = group.selectAll(".resize")
-      .data(resizes.map(function(t) { return {type: t}; }), function(d) { return d.type; });
+      .data(dim.resize, function(d) { return d.type; });
 
     resize.exit().remove();
 
@@ -135,8 +166,8 @@ export default function() {
     group
         .interrupt()
         .each(typeof selection === "function"
-            ? function() { this.__brush.selection = selection.apply(this, arguments); }
-            : function() { this.__brush.selection = selection; })
+            ? function() { this.__brush.selection = dim.input(selection.apply(this, arguments)); }
+            : function() { this.__brush.selection = dim.input(selection); })
         .each(redraw)
         .each(function() { emitter(this, arguments)("start")("brush")("end"); });
   };
@@ -173,7 +204,7 @@ export default function() {
 
   function emitter(that, args) {
     return function emit(type) {
-      customEvent(new BrushEvent(brush, type, that.__brush), listeners.apply, listeners, [type, that, args]);
+      customEvent(new BrushEvent(brush, type, dim.output(that.__brush.selection)), listeners.apply, listeners, [type, that, args]);
       return emit;
     };
   }
@@ -182,8 +213,8 @@ export default function() {
     var that = this,
         type = event.target.__data__.type,
         mode = (event.metaKey ? type = "background" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_RESIZE),
-        signX = signsX[type],
-        signY = signsY[type],
+        signX = dim === Y ? null : signsX[type],
+        signY = dim === X ? null : signsY[type],
         l = local(that),
         extent = l.extent,
         selection = l.selection,
@@ -197,7 +228,16 @@ export default function() {
         emit = emitter(that, arguments);
 
     if (type === "background") {
-      l.selection = selection = [[w0 = point0[0], n0 = point0[1]], [e0 = w0, s0 = n0]];
+      l.selection = selection = [
+        [
+          w0 = dim === Y ? W : point0[0],
+          n0 = dim === X ? N : point0[1]
+        ],
+        [
+          e0 = dim === Y ? E : w0,
+          s0 = dim === X ? S : n0
+        ]
+      ];
     } else {
       w0 = selection[0][0];
       n0 = selection[0][1];

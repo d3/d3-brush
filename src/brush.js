@@ -265,8 +265,8 @@ export default function() {
         // case 18: // ALT
         case 32: { // SPACE
           if (mode === MODE_RESIZE) {
-            if (signX > 0) w0 = w1 - dx; else if (signX < 0) e0 = e1 - dx;
-            if (signY > 0) n0 = n1 - dy; else if (signY < 0) s0 = s1 - dy;
+            if (signX < 0) e0 = e1 - dx; else if (signX > 0) w0 = w1 - dx;
+            if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;
             mode = MODE_SPACE;
             moved();
           }
@@ -287,8 +287,8 @@ export default function() {
         // case 18: // ALT
         case 32: { // SPACE
           if (mode === MODE_SPACE) {
-            if (signX > 0) w0 = w1; else if (signX < 0) e0 = e1;
-            if (signY > 0) n0 = n1; else if (signY < 0) s0 = s1;
+            if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;
+            if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
             mode = MODE_RESIZE;
             moved();
           }

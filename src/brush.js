@@ -163,7 +163,7 @@ export default function() {
   function mousedowned() {
     var that = this,
         type = event.target.__data__.type,
-        mode = type === "selection" ? MODE_DRAG : MODE_RESIZE, // TODO check event.altKey for MODE_CENTER
+        mode = type === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_RESIZE),
         signX = signsX[type],
         signY = signsY[type],
         l = local(that),

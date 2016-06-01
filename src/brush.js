@@ -271,8 +271,8 @@ export default function() {
           }
           break;
         }
-        case 32: { // SPACE
-          if (mode === MODE_RESIZE) {
+        case 32: { // SPACE; takes priority over ALT
+          if (mode === MODE_RESIZE || mode === MODE_CENTER) {
             if (signX < 0) e0 = e1 - dx; else if (signX > 0) w0 = w1 - dx;
             if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;
             mode = MODE_SPACE;
@@ -289,15 +289,28 @@ export default function() {
       event.stopPropagation();
     }
 
-    // TODO ALT and SPACE?
     function keyupped() {
       switch (event.keyCode) {
-        case 18: // ALT
-        case 32: { // SPACE
-          if (mode === MODE_SPACE || mode === MODE_CENTER) {
+        case 18: { // ALT
+          if (mode === MODE_CENTER) {
             if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;
             if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
             mode = MODE_RESIZE;
+            moved();
+          }
+          break;
+        }
+        case 32: { // SPACE
+          if (mode === MODE_SPACE) {
+            if (event.altKey) {
+              if (signX) e0 = e1 - dx * signX, w0 = w1 + dx * signX;
+              if (signY) s0 = s1 - dy * signY, n0 = n1 + dy * signY;
+              mode = MODE_CENTER;
+            } else {
+              if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;
+              if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
+              mode = MODE_RESIZE;
+            }
             moved();
           }
           break;

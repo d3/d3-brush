@@ -26,6 +26,24 @@ var cursors = {
   sw: "nesw-resize"
 };
 
+var flipX = {
+  e: "w",
+  w: "e",
+  nw: "ne",
+  ne: "nw",
+  se: "sw",
+  sw: "se"
+};
+
+var flipY = {
+  n: "s",
+  s: "n",
+  nw: "sw",
+  ne: "se",
+  se: "ne",
+  sw: "nw"
+};
+
 var signsX = {
   background: +1,
   selection: +1,
@@ -196,7 +214,7 @@ export default function() {
     group.selectAll("*")
         .interrupt();
 
-    group.selectAll(".background")
+    var background = group.selectAll(".background")
         .attr("cursor", cursors[type]);
 
     dragDisable(event.view);
@@ -235,9 +253,19 @@ export default function() {
         }
       }
 
-      // TODO update the background cursor when flipping!
-      if (e1 < w1) t = w0, w0 = e0, e0 = t, t = w1, w1 = e1, e1 = t, signX *= -1;
-      if (s1 < n1) t = n0, n0 = s0, s0 = t, t = n1, n1 = s1, s1 = t, signY *= -1;
+      if (e1 < w1) {
+        signX *= -1;
+        t = w0, w0 = e0, e0 = t;
+        t = w1, w1 = e1, e1 = t;
+        if (type in flipX) background.attr("cursor", cursors[type = flipX[type]]);
+      }
+
+      if (s1 < n1) {
+        signY *= -1;
+        t = n0, n0 = s0, s0 = t;
+        t = n1, n1 = s1, s1 = t;
+        if (type in flipY) background.attr("cursor", cursors[type = flipY[type]]);
+      }
 
       if (selected[0][0] !== w1
           || selected[0][1] !== e1
@@ -255,7 +283,7 @@ export default function() {
     function mouseupped() {
       dragEnable(event.view);
       group.attr("pointer-events", "all");
-      group.selectAll(".background").attr("cursor", cursors.background);
+      background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
       emit("end");
     }
@@ -276,6 +304,7 @@ export default function() {
             if (signX < 0) e0 = e1 - dx; else if (signX > 0) w0 = w1 - dx;
             if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;
             mode = MODE_SPACE;
+            background.attr("cursor", cursors.selection);
             moved();
           }
           break;
@@ -286,7 +315,7 @@ export default function() {
         default: return;
       }
       event.preventDefault();
-      event.stopPropagation();
+      event.stopImmediatePropagation();
     }
 
     function keyupped() {
@@ -311,6 +340,7 @@ export default function() {
               if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
               mode = MODE_RESIZE;
             }
+            background.attr("cursor", cursors[type]);
             moved();
           }
           break;
@@ -321,7 +351,7 @@ export default function() {
         default: return;
       }
       event.preventDefault();
-      event.stopPropagation();
+      event.stopImmediatePropagation();
     }
   }
 

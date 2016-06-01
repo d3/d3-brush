@@ -277,9 +277,9 @@ export default function() {
       }
 
       if (selection[0][0] !== w1
-          || selection[0][1] !== e1
-          || selection[1][0] !== s1
-          || selection[1][1] !== n1) {
+          || selection[0][1] !== n1
+          || selection[1][0] !== e1
+          || selection[1][1] !== s1) {
         selection[0][0] = w1;
         selection[0][1] = n1;
         selection[1][0] = e1;

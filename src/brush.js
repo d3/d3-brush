@@ -272,10 +272,10 @@ function brush(dim) {
 
     function mousemoved() {
       point = mouse(that);
-      moved();
+      move();
     }
 
-    function moved() {
+    function move() {
       var t;
 
       dx = point[0] - point0[0];
@@ -345,7 +345,7 @@ function brush(dim) {
             if (signX) e0 = e1 - dx * signX, w0 = w1 + dx * signX;
             if (signY) s0 = s1 - dy * signY, n0 = n1 + dy * signY;
             mode = MODE_CENTER;
-            moved();
+            move();
           }
           break;
         }
@@ -355,7 +355,7 @@ function brush(dim) {
             if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;
             mode = MODE_SPACE;
             background.attr("cursor", cursors.selection);
-            moved();
+            move();
           }
           break;
         }
@@ -375,7 +375,7 @@ function brush(dim) {
             if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;
             if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
             mode = MODE_RESIZE;
-            moved();
+            move();
           }
           break;
         }
@@ -391,7 +391,7 @@ function brush(dim) {
               mode = MODE_RESIZE;
             }
             background.attr("cursor", cursors[type]);
-            moved();
+            move();
           }
           break;
         }

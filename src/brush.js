@@ -59,6 +59,12 @@ function defaultExtent() {
       : [this.clientWidth, this.clientHeight]];
 }
 
+// Like d3.local, but with the name “__brush” rather than auto-generated.
+function local(node) {
+  while (!node.__brush) if (!(node = node.parentNode)) return;
+  return node.__brush;
+}
+
 export default function() {
   var extent = defaultExtent,
       listeners = dispatch(brush, "start", "brush", "end"),
@@ -310,12 +316,6 @@ export default function() {
     var local = this.__brush || {selected: null};
     local.extent = extent.apply(this, arguments);
     return local;
-  }
-
-  // Like d3.local, but with the name “__brush” rather than auto-generated.
-  function local(node) {
-    while (!node.__brush) if (!(node = node.parentNode)) return;
-    return node.__brush;
   }
 
   brush.extent = function(_) {

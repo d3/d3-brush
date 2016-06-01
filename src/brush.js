@@ -187,18 +187,22 @@ export default function() {
         l = local(that),
         extent = l.extent,
         selected = l.selected,
-        W = extent[0][0], w0 = selected[0][0], w1 = w0,
-        N = extent[0][1], n0 = selected[0][1], n1 = n0,
-        E = extent[1][0], e0 = selected[1][0], e1 = e0,
-        S = extent[1][1], s0 = selected[1][1], s1 = s0,
+        W = extent[0][0], w0, w1 = w0,
+        N = extent[0][1], n0, n1 = n0,
+        E = extent[1][0], e0, e1 = e0,
+        S = extent[1][1], s0, s1 = s0,
         dx, dy,
         point0 = mouse(that),
         point,
         emit = emitter(that, arguments);
 
     if (type === "background") {
-      w0 = e0 = selected[0][0] = selected[1][0] = point0[0];
-      n0 = s0 = selected[0][1] = selected[1][1] = point0[1];
+      l.selected = selected = [[w0 = point0[0], n0 = point0[1]], [e0 = w0, s0 = n0]];
+    } else {
+      w0 = selected[0][0];
+      n0 = selected[0][1];
+      e0 = selected[1][0];
+      s0 = selected[1][1];
     }
 
     var view = select(event.view)
@@ -285,6 +289,7 @@ export default function() {
       group.attr("pointer-events", "all");
       background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
+      if (w1 === e1 || n1 === s1) l.selected = null, redraw.call(that);
       emit("end");
     }
 

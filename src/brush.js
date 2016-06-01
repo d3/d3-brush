@@ -132,10 +132,14 @@ function brush(dim) {
         .attr("pointer-events", "all")
         .attr("cursor", cursors.background)
       .merge(background)
-        .attr("x", function() { var l = local(this); return l.extent[0][0]; })
-        .attr("y", function() { var l = local(this); return l.extent[0][1]; })
-        .attr("width", function() { var l = local(this); return l.extent[1][0] - l.extent[0][0]; })
-        .attr("height", function() { var l = local(this); return l.extent[1][1] - l.extent[0][1]; });
+        .each(function() {
+          var extent = local(this).extent;
+          select(this)
+              .attr("x", extent[0][0])
+              .attr("y", extent[0][1])
+              .attr("width", extent[1][0] - extent[0][0])
+              .attr("height", extent[1][1] - extent[0][1]);
+        });
 
     group.selectAll(".selection")
       .data([type("selection")])

@@ -206,71 +206,25 @@ export default function() {
       switch (mode) {
         case MODE_SPACE:
         case MODE_DRAG: {
-          if (signX) {
-            dx = Math.max(extent[0][0] - w, Math.min(extent[1][0] - e, dx));
-            w1 = w + dx;
-            e1 = e + dx;
-          }
-          if (signY) {
-            dy = Math.max(extent[0][1] - n, Math.min(extent[1][1] - s, dy));
-            n1 = n + dy;
-            s1 = s + dy;
-          }
+          if (signX) dx = Math.max(extent[0][0] - w, Math.min(extent[1][0] - e, dx)), w1 = w + dx, e1 = e + dx;
+          if (signY) dy = Math.max(extent[0][1] - n, Math.min(extent[1][1] - s, dy)), n1 = n + dy, s1 = s + dy;
           break;
         }
         case MODE_RESIZE: {
-          if (signX < 0) {
-            if (w + dx > e) {
-              t = w, w = e, e = t, signX *= -1;
-              w1 = w;
-              e1 = clampX(e + dx);
-            } else {
-              w1 = clampX(w + dx);
-            }
-          } else if (signX > 0) {
-            if (e + dx < w) {
-              t = w, w = e, e = t, signX *= -1;
-              w1 = clampX(w + dx);
-              e1 = e;
-            } else {
-              e1 = clampX(e + dx);
-            }
-          }
-          if (signY < 0) {
-            if (n + dy > s) {
-              t = n, n = s, s = t, signY *= -1;
-              n1 = n;
-              s1 = clampY(s + dy);
-            } else {
-              n1 = clampY(n + dy);
-            }
-          } else if (signY > 0) {
-            if (s + dy < n) {
-              t = n, n = s, s = t, signY *= -1;
-              n1 = clampY(n + dy);
-              s1 = s;
-            } else {
-              s1 = clampY(s + dy);
-            }
-          }
+          if (signX < 0) w1 = clampX(w + dx); else if (signX > 0) e1 = clampX(e + dx);
+          if (signY < 0) n1 = clampY(n + dy); else if (signY > 0) s1 = clampY(s + dy);
           break;
         }
         case MODE_CENTER: {
-          if (signX) {
-            dx *= signX;
-            if (e + dx < w - dx) t = w, w = e, e = t, signX *= -1, dx *= -1;
-            w1 = clampX(w - dx);
-            e1 = clampX(e + dx);
-          }
-          if (signY) {
-            dy *= signY;
-            if (s + dy < n - dy) t = n, n = s, s = t, signY *= -1, dy *= -1;
-            n1 = clampY(n - dy);
-            s1 = clampY(s + dy);
-          }
+          if (signX) dx *= signX, w1 = clampX(w - dx), e1 = clampX(e + dx);
+          if (signY) dy *= signY, n1 = clampY(n - dy), s1 = clampY(s + dy);
           break;
         }
       }
+
+      // TODO update the background cursor when flipping!
+      if (e1 < w1) signX *= -1, t = w, w = e, e = t, t = w1, w1 = e1, e1 = t;
+      if (s1 < n1) signY *= -1, t = n, n = s, s = t, t = n1, n1 = s1, s1 = t;
 
       if (selected[0][0] !== w1
           || selected[0][1] !== e1
@@ -293,7 +247,6 @@ export default function() {
       emit("end");
     }
 
-    // TODO what happens if you have both ALT and SPACE?
     function keydowned() {
       switch (event.keyCode) {
         case 18: // ALT
@@ -318,6 +271,8 @@ export default function() {
       event.stopPropagation();
     }
 
+    // TODO what happens if you have both ALT and SPACE?
+    // TODO this doesn’t work correctly if the selected extent is clamped :(
     function keyupped() {
       switch (event.keyCode) {
         case 18: // ALT

@@ -286,9 +286,6 @@ function brush(dim) {
         .interrupt()
         .attr("pointer-events", "none");
 
-    group.selectAll("*")
-        .interrupt();
-
     var background = group.selectAll(".background")
         .attr("cursor", cursors[type]);
 

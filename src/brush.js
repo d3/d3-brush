@@ -1,5 +1,6 @@
 import {dispatch} from "d3-dispatch";
 import {dragDisable, dragEnable} from "d3-drag";
+import {interpolate} from "d3-interpolate";
 import {customEvent, mouse, select} from "d3-selection";
 import constant from "./constant";
 import BrushEvent from "./event";
@@ -12,14 +13,14 @@ var MODE_DRAG = {name: "drag"},
 var X = {
   name: "x",
   resize: ["e", "w"].map(type),
-  input: function(x) { return x && [[x[0], NaN], [x[1], NaN]]; },
+  input: function(x, e) { return x && [[x[0], e[0][1]], [x[1], e[1][1]]]; },
   output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }
 };
 
 var Y = {
   name: "y",
   resize: ["n", "s"].map(type),
-  input: function(y) { return y && [[NaN, y[0]], [NaN, y[1]]]; },
+  input: function(y, e) { return y && [[e[0][0], y[0]], [e[1][0], y[1]]]; },
   output: function(xy) { return xy && [xy[0][1], xy[1][1]]; }
 };
 
@@ -165,15 +166,36 @@ function brush(dim) {
         .on("mousedown.brush", mousedowned);
   }
 
-  // TODO transitions
   brush.move = function(group, selection) {
-    group
-        .interrupt()
-        .each(typeof selection === "function"
-            ? function() { this.__brush.selection = dim.input(selection.apply(this, arguments)); }
-            : function() { this.__brush.selection = dim.input(selection); })
-        .each(redraw)
-        .each(function() { emitter(this, arguments)("start")("brush")("end"); });
+    if (group.selection) {
+      group
+          .on("start.brush", function() { emitter(this, arguments)("start"); })
+          .on("interrupt.brush end.brush", function() { emitter(this, arguments)("end"); })
+          .tween("brush", function() {
+            var that = this,
+                state = that.__brush,
+                emit = emitter(that, arguments),
+                selection0 = state.selection,
+                selection1 = dim.input(typeof selection === "function" ? selection.apply(this, arguments) : selection, state.extent),
+                i = interpolate(selection0, selection1);
+
+            function tween(t) {
+              state.selection = i(t);
+              redraw.call(that);
+              emit("brush");
+            }
+
+            return selection0 && selection1 ? tween : tween(1);
+          });
+    } else {
+      group
+          .interrupt()
+          .each(typeof selection === "function"
+              ? function() { var state = this.__brush; state.selection = dim.input(selection.apply(this, arguments), state.extent); }
+              : function() { var state = this.__brush; state.selection = dim.input(selection, state.extent); })
+          .each(redraw)
+          .each(function() { emitter(this, arguments)("start")("brush")("end"); });
+    }
   };
 
   function redraw() {
@@ -219,9 +241,9 @@ function brush(dim) {
         mode = (event.metaKey ? type = "background" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_RESIZE),
         signX = dim === Y ? null : signsX[type],
         signY = dim === X ? null : signsY[type],
-        l = local(that),
-        extent = l.extent,
-        selection = l.selection,
+        state = local(that),
+        extent = state.extent,
+        selection = state.selection,
         W = extent[0][0], w0, w1,
         N = extent[0][1], n0, n1,
         E = extent[1][0], e0, e1,
@@ -232,7 +254,7 @@ function brush(dim) {
         emit = emitter(that, arguments);
 
     if (type === "background") {
-      l.selection = selection = [
+      state.selection = selection = [
         [
           w0 = dim === Y ? W : point0[0],
           n0 = dim === X ? N : point0[1]
@@ -338,7 +360,7 @@ function brush(dim) {
       group.attr("pointer-events", "all");
       background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
-      if (w1 === e1 || n1 === s1) l.selection = null, redraw.call(that);
+      if (w1 === e1 || n1 === s1) state.selection = null, redraw.call(that);
       emit("end");
     }
 
@@ -410,9 +432,9 @@ function brush(dim) {
   }
 
   function initialize() {
-    var local = this.__brush || {selection: null};
-    local.extent = extent.apply(this, arguments);
-    return local;
+    var state = this.__brush || {selection: null};
+    state.extent = extent.apply(this, arguments);
+    return state;
   }
 
   brush.extent = function(_) {

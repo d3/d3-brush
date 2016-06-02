@@ -1,8 +1,8 @@
 # d3-brush
 
-The brush control allows interactive control over a one- or two-dimensional selected region. This method of interaction is often used to select discrete elements, such as dots in a scatterplot or icons on the desktop. It can also be used to determine a one- or two-dimensional region, say to zoom-in to an area of interest.
+Brushing is the interactive specification a one- or two-dimensional selection region using a pointing gesture, such as by clicking and dragging with the mouse. Brushing is often used to select discrete elements, such as dots in a scatterplot or files on a desktop. It can also be used to zoom-in to a region of interest.
 
-Click and drag on the brush selection to translate the selection. Click and drag on one of the selection handles to move the corresponding edge (or edges) of the selection. Click and drag on the invisible overlay to define a new brush selection, or click anywhere within the brushable region while holding down the META (⌘) key. Holding down the ALT (⌥) key while moving the brush causes it to reposition around its center, while holding down SPACE locks the current brush size, allowing only translation.
+The d3-brush module implements brushing for mouse and touch events using [SVG](https://www.w3.org/TR/SVG/). Click and drag on the brush selection to translate the selection. Click and drag on one of the selection handles to move the corresponding edge (or edges) of the selection. Click and drag on the invisible overlay to define a new brush selection, or click anywhere within the brushable region while holding down the META (⌘) key. Holding down the ALT (⌥) key while moving the brush causes it to reposition around its center, while holding down SPACE locks the current brush size, allowing only translation.
 
 ## Installing
 

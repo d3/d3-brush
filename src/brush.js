@@ -94,6 +94,11 @@ function type(t) {
   return {type: t};
 }
 
+// Ignore right-click, since that should open the context menu.
+function defaultFilter() {
+  return !event.button;
+}
+
 function defaultExtent() {
   var svg = this.ownerSVGElement;
   return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];
@@ -124,6 +129,7 @@ export default function() {
 
 function brush(dim) {
   var extent = defaultExtent,
+      filter = defaultFilter,
       listeners = dispatch(brush, "start", "brush", "end"),
       touchending;
 
@@ -276,6 +282,7 @@ function brush(dim) {
   function started() {
     if (event.touches) { if (event.changedTouches.length < event.touches.length) return noevent(); }
     else if (touchending) return;
+    if (!filter.apply(this, arguments)) return;
 
     var that = this,
         type = event.target.__data__.type,
@@ -482,6 +489,10 @@ function brush(dim) {
 
   brush.extent = function(_) {
     return arguments.length ? (extent = typeof _ === "function" ? _ : constant([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), brush) : extent;
+  };
+
+  brush.filter = function(_) {
+    return arguments.length ? (filter = typeof _ === "function" ? _ : constant(!!_), brush) : filter;
   };
 
   brush.on = function() {

@@ -1,6 +1,8 @@
 # d3-brush
 
-…
+The brush control allows interactive control over a one- or two-dimensional selected region. This method of interaction is often used to select discrete elements, such as dots in a scatterplot or icons on the desktop. It can also be used to determine a one- or two-dimensional region, say to zoom-in to an area of interest.
+
+Click and drag on the brush selection to translate the selection. Click and drag on one of the selection handles to move the corresponding edge (or edges) of the selection. Click and drag on the invisible overlay to define a new brush selection, or click anywhere within the brushable region while holding down the META (⌘) key. Holding down the ALT (⌥) key while moving the brush causes it to reposition around its center, while holding down SPACE locks the current brush size, allowing only translation.
 
 ## Installing
 
@@ -72,9 +74,7 @@ The brush also creates the SVG elements necessary to display the brush selection
 </g>
 ```
 
-The overlay is an invisible rectangle that covers the brushable area defined by [*brush*.extent](#brush_extent); click and drag on the overlay to define a new brush selection. Click and drag on the selection to translate an existing selection, or click and drag on one of the handles to move the corresponding edge (or edges) of the selection.
-
-To modify the brush selection programmatically, use [*brush*.move](#brush_move).
+The overlay rect covers the brushable area defined by [*brush*.extent](#brush_extent). The selection rect covers the area defined by the current [brush selection](#brushSelection). The handle rects cover the edges and corners of the brush selection, allowing the corresponding value in the brush selection to be modified interactively. To modify the brush selection programmatically, use [*brush*.move](#brush_move).
 
 <a href="#brush_move" name="brush_move">#</a> <i>brush</i>.<b>move</b>(<i>group</i>, <i>selection</i>)
 

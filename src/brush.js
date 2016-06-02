@@ -420,9 +420,6 @@ function brush(dim) {
           }
           break;
         }
-        case 16: { // SHIFT
-          break;
-        }
         default: return;
       }
       noevent();
@@ -453,9 +450,6 @@ function brush(dim) {
             background.attr("cursor", cursors[type]);
             move();
           }
-          break;
-        }
-        case 16: { // SHIFT
           break;
         }
         default: return;

@@ -106,6 +106,11 @@ function local(node) {
   return node.__brush;
 }
 
+function empty(extent) {
+  return extent[0][0] === extent[1][0]
+      || extent[0][1] === extent[1][1];
+}
+
 export function brushX() {
   return brush(X);
 }
@@ -181,7 +186,7 @@ function brush(dim) {
                 i = interpolate(selection0, selection1);
 
             function tween(t) {
-              state.selection = i(t);
+              state.selection = t === 1 && empty(selection1) ? null : i(t);
               redraw.call(that);
               emit.brush();
             }
@@ -193,11 +198,12 @@ function brush(dim) {
           .each(function() {
             var that = this,
                 args = arguments,
+                selection = dim.input(typeof selection === "function" ? selection.apply(that, args) : selection, state.extent),
                 emit = emitter(that, args).beforestart(),
                 state = that.__brush;
 
             interrupt(that);
-            state.selection = dim.input(typeof selection === "function" ? selection.apply(that, args) : selection, state.extent);
+            state.selection = empty(selection) ? null : selection;
             redraw.call(that);
             emit.start().brush().end();
           });
@@ -389,7 +395,7 @@ function brush(dim) {
       group.attr("pointer-events", "all");
       background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
-      if (w1 === e1 || n1 === s1) state.selection = null, redraw.call(that);
+      if (empty(selection)) state.selection = null, redraw.call(that);
       emit.end();
     }
 

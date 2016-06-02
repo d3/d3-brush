@@ -124,7 +124,8 @@ export default function() {
 
 function brush(dim) {
   var extent = defaultExtent,
-      listeners = dispatch(brush, "start", "brush", "end");
+      listeners = dispatch(brush, "start", "brush", "end"),
+      touchending;
 
   function brush(group) {
     var background = group
@@ -168,7 +169,7 @@ function brush(dim) {
         .each(redraw)
         .attr("pointer-events", "all")
         .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
-        .on("mousedown.brush", mousedowned);
+        .on("mousedown.brush touchstart.brush", started);
   }
 
   brush.move = function(group, selection) {
@@ -272,7 +273,10 @@ function brush(dim) {
     }
   };
 
-  function mousedowned() {
+  function started() {
+    if (event.touches) { if (event.changedTouches.length < event.touches.length) return noevent(); }
+    else if (touchending) return;
+
     var that = this,
         type = event.target.__data__.type,
         mode = (event.metaKey ? type = "background" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_RESIZE),
@@ -308,25 +312,32 @@ function brush(dim) {
     e1 = e0;
     s1 = s0;
 
-    var view = select(event.view)
-        .on("keydown.brush", keydowned, true)
-        .on("keyup.brush", keyupped, true)
-        .on("mousemove.brush", mousemoved, true)
-        .on("mouseup.brush", mouseupped, true);
-
     var group = select(that)
         .attr("pointer-events", "none");
 
     var background = group.selectAll(".background")
         .attr("cursor", cursors[type]);
 
+    if (event.touches) {
+      group
+          .on("touchmove.brush", moved, true)
+          .on("touchend.brush touchcancel.brush", ended, true);
+    } else {
+      var view = select(event.view)
+          .on("keydown.brush", keydowned, true)
+          .on("keyup.brush", keyupped, true)
+          .on("mousemove.brush", moved, true)
+          .on("mouseup.brush", ended, true);
+
+      dragDisable(event.view);
+    }
+
     nopropagation();
     interrupt(that);
-    dragDisable(event.view);
     redraw.call(that);
     emit.start();
 
-    function mousemoved() {
+    function moved() {
       point = mouse(that);
       moving = true;
       noevent();
@@ -387,12 +398,19 @@ function brush(dim) {
       }
     }
 
-    function mouseupped() {
+    function ended() {
       nopropagation();
-      dragEnable(event.view, moving);
+      if (event.touches) {
+        if (event.touches.length) return;
+        if (touchending) clearTimeout(touchending);
+        touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!
+        group.on("touchmove.brush touchend.brush touchcancel.brush", null);
+      } else {
+        dragEnable(event.view, moving);
+        view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
+      }
       group.attr("pointer-events", "all");
       background.attr("cursor", cursors.background);
-      view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
       if (empty(selection)) state.selection = null, redraw.call(that);
       emit.end();
     }

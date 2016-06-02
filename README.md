@@ -29,15 +29,15 @@ var brush = d3_brush.brush();
 
 <a href="#brush" name="brush">#</a> d3.<b>brush</b>()
 
-…
+Creates a new two-dimensional brush.
 
 <a href="#brushX" name="brushX">#</a> d3.<b>brushX</b>()
 
-…
+Creates a new one-dimensional brush along the *x*-dimension.
 
 <a href="#brushY" name="brushY">#</a> d3.<b>brushY</b>()
 
-…
+Creates a new one-dimensional brush along the *y*-dimension.
 
 <a href="#_brush" name="_brush">#</a> <i>brush</i>(<i>group</i>)
 
@@ -55,7 +55,7 @@ Internally, the brush uses [*selection*.on](https://github.com/d3/d3-selection#s
 group.on(".brush", null);
 ```
 
-The brush also creates the SVG elements necessary to render the brush. The structure of a two-dimensional brush is as follows:
+The brush also creates the SVG elements necessary to display the brush selection and to receive input events for interaction. The structure of a two-dimensional brush is as follows:
 
 ```html
 <g class="brush" pointer-events="all" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">

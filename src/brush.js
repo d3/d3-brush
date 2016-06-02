@@ -1,7 +1,7 @@
 import {dispatch} from "d3-dispatch";
 import {dragDisable, dragEnable} from "d3-drag";
 import {interpolate} from "d3-interpolate";
-import {customEvent, mouse, select} from "d3-selection";
+import {customEvent, event, mouse, select} from "d3-selection";
 import {interrupt} from "d3-transition";
 import constant from "./constant";
 import BrushEvent from "./event";

@@ -115,6 +115,11 @@ function empty(extent) {
       || extent[0][1] === extent[1][1];
 }
 
+export function brushSelection(node) {
+  var state = node.__brush;
+  return state ? state.dim.output(state.selection) : null;
+}
+
 export function brushX() {
   return brush(X);
 }
@@ -485,6 +490,7 @@ function brush(dim) {
   function initialize() {
     var state = this.__brush || {selection: null};
     state.extent = extent.apply(this, arguments);
+    state.dim = dim;
     return state;
   }
 

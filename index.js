@@ -1,2 +1,8 @@
 export {version} from "./build/package";
-export {default as brush, brushX, brushY} from "./src/brush";
+
+export {
+  default as brush,
+  brushX,
+  brushY,
+  brushSelection
+} from "./src/brush";

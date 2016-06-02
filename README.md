@@ -55,7 +55,7 @@ Internally, the brush uses [*selection*.on](https://github.com/d3/d3-selection#s
 group.on(".brush", null);
 ```
 
-The brush also creates the SVG elements necessary to display the brush selection and to receive input events for interaction. The structure of a two-dimensional brush is as follows:
+The brush also creates the SVG elements necessary to display the brush selection and to receive input events for interaction. You can add, remove or modify these elements as desired to change the brush appearance; you can also apply stylesheets to modify the brush appearance. The structure of a two-dimensional brush is as follows:
 
 ```html
 <g class="brush" pointer-events="all" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">

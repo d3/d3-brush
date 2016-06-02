@@ -58,17 +58,17 @@ group.on(".brush", null);
 The brush also creates the SVG elements necessary to display the brush selection and to receive input events for interaction. You can add, remove or modify these elements as desired to change the brush appearance; you can also apply stylesheets to modify the brush appearance. The structure of a two-dimensional brush is as follows:
 
 ```html
-<g class="brush" pointer-events="all" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
-  <rect class="overlay" fill="none" pointer-events="all" cursor="crosshair" x="0" y="0" width="960" height="500"></rect>
+<g class="brush" fill="none" pointer-events="all" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+  <rect class="overlay" pointer-events="all" cursor="crosshair" x="0" y="0" width="960" height="500"></rect>
   <rect class="selection" cursor="move" fill="rgba(0,0,0,0.15)" x="112" y="194" width="182" height="83"></rect>
-  <rect class="handle handle--n" cursor="ns-resize" fill="none" x="107" y="189" width="192" height="10"></rect>
-  <rect class="handle handle--e" cursor="ew-resize" fill="none" x="289" y="189" width="10" height="93"></rect>
-  <rect class="handle handle--s" cursor="ns-resize" fill="none" x="107" y="272" width="192" height="10"></rect>
-  <rect class="handle handle--w" cursor="ew-resize" fill="none" x="107" y="189" width="10" height="93"></rect>
-  <rect class="handle handle--nw" cursor="nwse-resize" fill="none" x="107" y="189" width="10" height="10"></rect>
-  <rect class="handle handle--ne" cursor="nesw-resize" fill="none" x="289" y="189" width="10" height="10"></rect>
-  <rect class="handle handle--se" cursor="nwse-resize" fill="none" x="289" y="272" width="10" height="10"></rect>
-  <rect class="handle handle--sw" cursor="nesw-resize" fill="none" x="107" y="272" width="10" height="10"></rect>
+  <rect class="handle handle--n" cursor="ns-resize" x="107" y="189" width="192" height="10"></rect>
+  <rect class="handle handle--e" cursor="ew-resize" x="289" y="189" width="10" height="93"></rect>
+  <rect class="handle handle--s" cursor="ns-resize" x="107" y="272" width="192" height="10"></rect>
+  <rect class="handle handle--w" cursor="ew-resize" x="107" y="189" width="10" height="93"></rect>
+  <rect class="handle handle--nw" cursor="nwse-resize" x="107" y="189" width="10" height="10"></rect>
+  <rect class="handle handle--ne" cursor="nesw-resize" x="289" y="189" width="10" height="10"></rect>
+  <rect class="handle handle--se" cursor="nwse-resize" x="289" y="272" width="10" height="10"></rect>
+  <rect class="handle handle--sw" cursor="nesw-resize" x="107" y="272" width="10" height="10"></rect>
 </g>
 ```
 

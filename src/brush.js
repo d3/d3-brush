@@ -147,7 +147,6 @@ function brush(dim) {
 
     overlay.enter().append("rect")
         .attr("class", "overlay")
-        .attr("fill", "none")
         .attr("pointer-events", "all")
         .attr("cursor", cursors.overlay)
       .merge(overlay)
@@ -174,11 +173,11 @@ function brush(dim) {
 
     handle.enter().append("rect")
         .attr("class", function(d) { return "handle handle--" + d.type; })
-        .attr("cursor", function(d) { return cursors[d.type]; })
-        .attr("fill", "none");
+        .attr("cursor", function(d) { return cursors[d.type]; });
 
     group
         .each(redraw)
+        .attr("fill", "none")
         .attr("pointer-events", "all")
         .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
         .on("mousedown.brush touchstart.brush", started);

@@ -34,7 +34,7 @@ var XY = {
 };
 
 var cursors = {
-  background: "crosshair",
+  overlay: "crosshair",
   selection: "move",
   n: "ns-resize",
   e: "ew-resize",
@@ -65,7 +65,7 @@ var flipY = {
 };
 
 var signsX = {
-  background: +1,
+  overlay: +1,
   selection: +1,
   n: null,
   e: +1,
@@ -78,7 +78,7 @@ var signsX = {
 };
 
 var signsY = {
-  background: +1,
+  overlay: +1,
   selection: +1,
   n: -1,
   e: null,
@@ -135,17 +135,17 @@ function brush(dim) {
       touchending;
 
   function brush(group) {
-    var background = group
+    var overlay = group
         .property("__brush", initialize)
-      .selectAll(".background")
-      .data([type("background")]);
+      .selectAll(".overlay")
+      .data([type("overlay")]);
 
-    background.enter().append("rect")
-        .attr("class", "background")
+    overlay.enter().append("rect")
+        .attr("class", "overlay")
         .attr("fill", "none")
         .attr("pointer-events", "all")
-        .attr("cursor", cursors.background)
-      .merge(background)
+        .attr("cursor", cursors.overlay)
+      .merge(overlay)
         .each(function() {
           var extent = local(this).extent;
           select(this)
@@ -287,7 +287,7 @@ function brush(dim) {
 
     var that = this,
         type = event.target.__data__.type,
-        mode = (event.metaKey ? type = "background" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_HANDLE),
+        mode = (event.metaKey ? type = "overlay" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_HANDLE),
         signX = dim === Y ? null : signsX[type],
         signY = dim === X ? null : signsY[type],
         state = local(that),
@@ -303,7 +303,7 @@ function brush(dim) {
         point,
         emit = emitter(that, arguments).beforestart();
 
-    if (type === "background") {
+    if (type === "overlay") {
       state.selection = selection = [
         [w0 = dim === Y ? W : point0[0], n0 = dim === X ? N : point0[1]],
         [e0 = dim === Y ? E : w0, s0 = dim === X ? S : n0]
@@ -323,7 +323,7 @@ function brush(dim) {
     var group = select(that)
         .attr("pointer-events", "none");
 
-    var background = group.selectAll(".background")
+    var overlay = group.selectAll(".overlay")
         .attr("cursor", cursors[type]);
 
     if (event.touches) {
@@ -383,14 +383,14 @@ function brush(dim) {
         signX *= -1;
         t = w0, w0 = e0, e0 = t;
         t = w1, w1 = e1, e1 = t;
-        if (type in flipX) background.attr("cursor", cursors[type = flipX[type]]);
+        if (type in flipX) overlay.attr("cursor", cursors[type = flipX[type]]);
       }
 
       if (s1 < n1) {
         signY *= -1;
         t = n0, n0 = s0, s0 = t;
         t = n1, n1 = s1, s1 = t;
-        if (type in flipY) background.attr("cursor", cursors[type = flipY[type]]);
+        if (type in flipY) overlay.attr("cursor", cursors[type = flipY[type]]);
       }
 
       if (selection[0][0] !== w1
@@ -418,7 +418,7 @@ function brush(dim) {
         view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
       }
       group.attr("pointer-events", "all");
-      background.attr("cursor", cursors.background);
+      overlay.attr("cursor", cursors.overlay);
       if (empty(selection)) state.selection = null, redraw.call(that);
       emit.end();
     }
@@ -439,7 +439,7 @@ function brush(dim) {
             if (signX < 0) e0 = e1 - dx; else if (signX > 0) w0 = w1 - dx;
             if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;
             mode = MODE_SPACE;
-            background.attr("cursor", cursors.selection);
+            overlay.attr("cursor", cursors.selection);
             move();
           }
           break;
@@ -471,7 +471,7 @@ function brush(dim) {
               if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
               mode = MODE_HANDLE;
             }
-            background.attr("cursor", cursors[type]);
+            overlay.attr("cursor", cursors[type]);
             move();
           }
           break;

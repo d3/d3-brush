@@ -9,26 +9,26 @@ import noevent, {nopropagation} from "./noevent";
 
 var MODE_DRAG = {name: "drag"},
     MODE_SPACE = {name: "space"},
-    MODE_RESIZE = {name: "resize"},
+    MODE_HANDLE = {name: "handle"},
     MODE_CENTER = {name: "center"};
 
 var X = {
   name: "x",
-  resize: ["e", "w"].map(type),
+  handles: ["e", "w"].map(type),
   input: function(x, e) { return x && [[x[0], e[0][1]], [x[1], e[1][1]]]; },
   output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }
 };
 
 var Y = {
   name: "y",
-  resize: ["n", "s"].map(type),
+  handles: ["n", "s"].map(type),
   input: function(y, e) { return y && [[e[0][0], y[0]], [e[1][0], y[1]]]; },
   output: function(xy) { return xy && [xy[0][1], xy[1][1]]; }
 };
 
 var XY = {
   name: "xy",
-  resize: ["n", "e", "s", "w", "nw", "ne", "se", "sw"].map(type),
+  handles: ["n", "e", "s", "w", "nw", "ne", "se", "sw"].map(type),
   input: function(xy) { return xy; },
   output: function(xy) { return xy; }
 };
@@ -131,6 +131,7 @@ function brush(dim) {
   var extent = defaultExtent,
       filter = defaultFilter,
       listeners = dispatch(brush, "start", "brush", "end"),
+      handleSize = 6,
       touchending;
 
   function brush(group) {
@@ -161,13 +162,13 @@ function brush(dim) {
         .attr("cursor", cursors.selection)
         .attr("fill", "rgba(0,0,0,0.15)");
 
-    var resize = group.selectAll(".resize")
-      .data(dim.resize, function(d) { return d.type; });
+    var handle = group.selectAll(".handle")
+      .data(dim.handles, function(d) { return d.type; });
 
-    resize.exit().remove();
+    handle.exit().remove();
 
-    resize.enter().append("rect")
-        .attr("class", function(d) { return "resize resize--" + d.type; })
+    handle.enter().append("rect")
+        .attr("class", function(d) { return "handle handle--" + d.type; })
         .attr("cursor", function(d) { return cursors[d.type]; })
         .attr("fill", "none");
 
@@ -228,16 +229,16 @@ function brush(dim) {
           .attr("width", selection[1][0] - selection[0][0])
           .attr("height", selection[1][1] - selection[0][1]);
 
-      group.selectAll(".resize")
+      group.selectAll(".handle")
           .style("display", null)
-          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? selection[1][0] - 3 : selection[0][0] - 3; })
-          .attr("y", function(d) { return d.type[0] === "s" ? selection[1][1] - 3 : selection[0][1] - 3; })
-          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? selection[1][0] - selection[0][0] + 6 : 6; })
-          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? selection[1][1] - selection[0][1] + 6 : 6; });
+          .attr("x", function(d) { return d.type[d.type.length - 1] === "e" ? selection[1][0] - handleSize / 2 : selection[0][0] - handleSize / 2; })
+          .attr("y", function(d) { return d.type[0] === "s" ? selection[1][1] - handleSize / 2 : selection[0][1] - handleSize / 2; })
+          .attr("width", function(d) { return d.type === "n" || d.type === "s" ? selection[1][0] - selection[0][0] + handleSize : handleSize; })
+          .attr("height", function(d) { return d.type === "e" || d.type === "w" ? selection[1][1] - selection[0][1] + handleSize : handleSize; });
     }
 
     else {
-      group.selectAll(".selection,.resize")
+      group.selectAll(".selection,.handle")
           .style("display", "none")
           .attr("x", null)
           .attr("y", null)
@@ -286,7 +287,7 @@ function brush(dim) {
 
     var that = this,
         type = event.target.__data__.type,
-        mode = (event.metaKey ? type = "background" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_RESIZE),
+        mode = (event.metaKey ? type = "background" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_HANDLE),
         signX = dim === Y ? null : signsX[type],
         signY = dim === X ? null : signsY[type],
         state = local(that),
@@ -364,7 +365,7 @@ function brush(dim) {
           if (signY) dy = Math.max(N - n0, Math.min(S - s0, dy)), n1 = n0 + dy, s1 = s0 + dy;
           break;
         }
-        case MODE_RESIZE: {
+        case MODE_HANDLE: {
           if (signX < 0) dx = Math.max(W - w0, Math.min(E - w0, dx)), w1 = w0 + dx, e1 = e0;
           else if (signX > 0) dx = Math.max(W - e0, Math.min(E - e0, dx)), w1 = w0, e1 = e0 + dx;
           if (signY < 0) dy = Math.max(N - n0, Math.min(S - n0, dy)), n1 = n0 + dy, s1 = s0;
@@ -425,7 +426,7 @@ function brush(dim) {
     function keydowned() {
       switch (event.keyCode) {
         case 18: { // ALT
-          if (mode === MODE_RESIZE) {
+          if (mode === MODE_HANDLE) {
             if (signX) e0 = e1 - dx * signX, w0 = w1 + dx * signX;
             if (signY) s0 = s1 - dy * signY, n0 = n1 + dy * signY;
             mode = MODE_CENTER;
@@ -434,7 +435,7 @@ function brush(dim) {
           break;
         }
         case 32: { // SPACE; takes priority over ALT
-          if (mode === MODE_RESIZE || mode === MODE_CENTER) {
+          if (mode === MODE_HANDLE || mode === MODE_CENTER) {
             if (signX < 0) e0 = e1 - dx; else if (signX > 0) w0 = w1 - dx;
             if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;
             mode = MODE_SPACE;
@@ -454,7 +455,7 @@ function brush(dim) {
           if (mode === MODE_CENTER) {
             if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;
             if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
-            mode = MODE_RESIZE;
+            mode = MODE_HANDLE;
             move();
           }
           break;
@@ -468,7 +469,7 @@ function brush(dim) {
             } else {
               if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;
               if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;
-              mode = MODE_RESIZE;
+              mode = MODE_HANDLE;
             }
             background.attr("cursor", cursors[type]);
             move();
@@ -493,6 +494,10 @@ function brush(dim) {
 
   brush.filter = function(_) {
     return arguments.length ? (filter = typeof _ === "function" ? _ : constant(!!_), brush) : filter;
+  };
+
+  brush.handleSize = function(_) {
+    return arguments.length ? (handleSize = +_, brush) : handleSize;
   };
 
   brush.on = function() {

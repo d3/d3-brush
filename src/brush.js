@@ -5,6 +5,7 @@ import {customEvent, mouse, select} from "d3-selection";
 import {interrupt} from "d3-transition";
 import constant from "./constant";
 import BrushEvent from "./event";
+import noevent, {nopropagation} from "./noevent";
 
 var MODE_DRAG = {name: "drag"},
     MODE_SPACE = {name: "space"},
@@ -287,6 +288,7 @@ function brush(dim) {
         E = extent[1][0], e0, e1,
         S = extent[1][1], s0, s1,
         dx, dy,
+        moving,
         point0 = mouse(that),
         point,
         emit = emitter(that, arguments).beforestart();
@@ -320,6 +322,7 @@ function brush(dim) {
     var background = group.selectAll(".background")
         .attr("cursor", cursors[type]);
 
+    nopropagation();
     interrupt(that);
     dragDisable(event.view);
     redraw.call(that);
@@ -327,6 +330,8 @@ function brush(dim) {
 
     function mousemoved() {
       point = mouse(that);
+      moving = true;
+      noevent();
       move();
     }
 
@@ -385,7 +390,8 @@ function brush(dim) {
     }
 
     function mouseupped() {
-      dragEnable(event.view);
+      nopropagation();
+      dragEnable(event.view, moving);
       group.attr("pointer-events", "all");
       background.attr("cursor", cursors.background);
       view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
@@ -419,8 +425,7 @@ function brush(dim) {
         }
         default: return;
       }
-      event.preventDefault();
-      event.stopImmediatePropagation();
+      noevent();
     }
 
     function keyupped() {
@@ -455,8 +460,7 @@ function brush(dim) {
         }
         default: return;
       }
-      event.preventDefault();
-      event.stopImmediatePropagation();
+      noevent();
     }
   }
 

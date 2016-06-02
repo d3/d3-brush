@@ -96,9 +96,7 @@ function type(t) {
 
 function defaultExtent() {
   var svg = this.ownerSVGElement;
-  return [[0, 0], svg
-      ? [svg.width.baseVal.value, svg.height.baseVal.value]
-      : [this.clientWidth, this.clientHeight]];
+  return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];
 }
 
 // Like d3.local, but with the name “__brush” rather than auto-generated.

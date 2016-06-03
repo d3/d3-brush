@@ -164,8 +164,8 @@ function brush(dim) {
       .enter().append("rect")
         .attr("class", "selection")
         .attr("cursor", cursors.selection)
-        .attr("fill", "#000")
-        .attr("fill-opacity", 0.15)
+        .attr("fill", "#777")
+        .attr("fill-opacity", 0.3)
         .attr("stroke", "#fff")
         .attr("shape-rendering", "crispEdges");
 

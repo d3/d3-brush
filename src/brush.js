@@ -304,7 +304,7 @@ function brush(dim) {
         dx,
         dy,
         moving,
-        shifting = event.shiftKey,
+        shifting = signX && signY && event.shiftKey,
         lockX,
         lockY,
         point0 = mouse(that),
@@ -442,7 +442,7 @@ function brush(dim) {
     function keydowned() {
       switch (event.keyCode) {
         case 16: { // SHIFT
-          shifting = true;
+          shifting = signX && signY;
           break;
         }
         case 18: { // ALT

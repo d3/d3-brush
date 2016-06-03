@@ -301,10 +301,14 @@ function brush(dim) {
         N = extent[0][1], n0, n1,
         E = extent[1][0], e0, e1,
         S = extent[1][1], s0, s1,
-        dx, dy,
+        dx,
+        dy,
         moving,
+        shifting = event.shiftKey,
+        lockX,
+        lockY,
         point0 = mouse(that),
-        point,
+        point = point0,
         emit = emitter(that, arguments).beforestart();
 
     if (type === "overlay") {
@@ -350,7 +354,12 @@ function brush(dim) {
     emit.start();
 
     function moved() {
-      point = mouse(that);
+      var point1 = mouse(that);
+      if (shifting && !lockX && !lockY) {
+        if (Math.abs(point1[0] - point[0]) > Math.abs(point1[1] - point[1])) lockY = true;
+        else lockX = true;
+      }
+      point = point1;
       moving = true;
       noevent();
       move();
@@ -397,6 +406,9 @@ function brush(dim) {
         if (type in flipY) overlay.attr("cursor", cursors[type = flipY[type]]);
       }
 
+      if (lockX) w1 = selection[0][0], e1 = selection[1][0];
+      if (lockY) n1 = selection[0][1], s1 = selection[1][1];
+
       if (selection[0][0] !== w1
           || selection[0][1] !== n1
           || selection[1][0] !== e1
@@ -429,6 +441,10 @@ function brush(dim) {
 
     function keydowned() {
       switch (event.keyCode) {
+        case 16: { // SHIFT
+          shifting = true;
+          break;
+        }
         case 18: { // ALT
           if (mode === MODE_HANDLE) {
             if (signX) e0 = e1 - dx * signX, w0 = w1 + dx * signX;
@@ -455,6 +471,13 @@ function brush(dim) {
 
     function keyupped() {
       switch (event.keyCode) {
+        case 16: { // SHIFT
+          if (shifting) {
+            lockX = lockY = shifting = false;
+            move();
+          }
+          break;
+        }
         case 18: { // ALT
           if (mode === MODE_CENTER) {
             if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;

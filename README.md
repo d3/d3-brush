@@ -64,7 +64,7 @@ The brush also creates the SVG elements necessary to display the brush selection
 ```html
 <g class="brush" fill="none" pointer-events="all" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
   <rect class="overlay" pointer-events="all" cursor="crosshair" x="0" y="0" width="960" height="500"></rect>
-  <rect class="selection" cursor="move" fill="rgba(0,0,0,0.15)" x="112" y="194" width="182" height="83"></rect>
+  <rect class="selection" cursor="move" fill="#000" fill-opacity="0.15" stroke="#fff" shape-rendering="crispEdges" x="112" y="194" width="182" height="83"></rect>
   <rect class="handle handle--n" cursor="ns-resize" x="107" y="189" width="192" height="10"></rect>
   <rect class="handle handle--e" cursor="ew-resize" x="289" y="189" width="10" height="93"></rect>
   <rect class="handle handle--s" cursor="ns-resize" x="107" y="272" width="192" height="10"></rect>

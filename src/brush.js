@@ -164,7 +164,10 @@ function brush(dim) {
       .enter().append("rect")
         .attr("class", "selection")
         .attr("cursor", cursors.selection)
-        .attr("fill", "rgba(0,0,0,0.15)");
+        .attr("fill", "#000")
+        .attr("fill-opacity", 0.15)
+        .attr("stroke", "#fff")
+        .attr("shape-rendering", "crispEdges");
 
     var handle = group.selectAll(".handle")
       .data(dim.handles, function(d) { return d.type; });

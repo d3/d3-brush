@@ -209,9 +209,9 @@ function brush(dim) {
           .each(function() {
             var that = this,
                 args = arguments,
+                state = that.__brush,
                 selection = dim.input(typeof selection === "function" ? selection.apply(that, args) : selection, state.extent),
-                emit = emitter(that, args).beforestart(),
-                state = that.__brush;
+                emit = emitter(that, args).beforestart();
 
             interrupt(that);
             state.selection = empty(selection) ? null : selection;

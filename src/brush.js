@@ -210,11 +210,11 @@ function brush(dim) {
             var that = this,
                 args = arguments,
                 state = that.__brush,
-                selection = dim.input(typeof selection === "function" ? selection.apply(that, args) : selection, state.extent),
+                selection1 = dim.input(typeof selection === "function" ? selection.apply(that, args) : selection, state.extent),
                 emit = emitter(that, args).beforestart();
 
             interrupt(that);
-            state.selection = empty(selection) ? null : selection;
+            state.selection = selection1 == null || empty(selection1) ? null : selection1;
             redraw.call(that);
             emit.start().brush().end();
           });

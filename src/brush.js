@@ -418,7 +418,7 @@ function brush(dim) {
           || selection[0][1] !== n1
           || selection[1][0] !== e1
           || selection[1][1] !== s1) {
-        state.selection = [[w1, n1], [e1, e1]];
+        state.selection = [[w1, n1], [e1, s1]];
         redraw.call(that);
         emit.brush();
       }

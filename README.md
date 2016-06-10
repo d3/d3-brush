@@ -8,7 +8,7 @@ The d3-brush module implements brushing for mouse and touch events using [SVG](h
 
 Brushes also support programmatic control. For example, you can listen to [*end* events](#brush-events), and then initiate a transition with [*brush*.move](#brush_move) to snap the brush selection to semantic boundaries:
 
-[<img alt="Brush Snapping" src="https://raw.githubusercontent.com/d3/d3-brush/master/img/snapping.jpg" width="420" height="219">](http://bl.ocks.org/mbostock/6232537)
+[<img alt="Brush Snapping" src="https://raw.githubusercontent.com/d3/d3-brush/master/img/snapping.png" width="420" height="219">](http://bl.ocks.org/mbostock/6232537)
 
 ## Installing
 

@@ -4,6 +4,7 @@
   "description": "Select a one- or two-dimensional region using the mouse or touch.",
   "keywords": [
     "d3",
+    "d3-module",
     "brush",
     "interaction"
   ],

@@ -121,9 +121,9 @@ If *listener* is specified, sets the event *listener* for the specified *typenam
 
 The *typenames* is a string containing one or more *typename* separated by whitespace. Each *typename* is a *type*, optionally followed by a period (`.`) and a *name*, such as `brush.foo` and `brush.bar`; the name allows multiple listeners to be registered for the same *type*. The *type* must be one of the following:
 
-* `start` - at the start of a brush gesture, such as on mousedown.
+* `brushstart` - at the start of a brush gesture, such as on mousedown.
 * `brush` - when the brush moves, such as on mousemove.
-* `end` - at the end of a brush gesture, such as on mouseup.
+* `brushend` - at the end of a brush gesture, such as on mouseup.
 
 See [*dispatch*.on](https://github.com/d3/d3-dispatch#dispatch_on) and [Brush Events](#brush-events) for more.
 

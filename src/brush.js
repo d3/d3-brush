@@ -100,7 +100,7 @@ function defaultFilter() {
 }
 
 function defaultExtent() {
-  var svg = this.ownerSVGElement;
+  var svg = this.ownerSVGElement || this;
   return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];
 }
 

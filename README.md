@@ -92,7 +92,7 @@ If *extent* is specified, sets the brushable extent to the specified array of po
 
 ```js
 function extent() {
-  var svg = this.ownerSVGElement;
+  var svg = this.ownerSVGElement || this;
   return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];
 }
 ```

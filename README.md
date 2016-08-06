@@ -35,7 +35,7 @@ var brush = d3.brush();
 
 ## API Reference
 
-<a href="#brush" name="brush">#</a> d3.<b>brush</b>() [<>](https://github.com/d3/d3-brush/blob/master/src/brush.js "Source")
+<a href="#brush" name="brush">#</a> d3.<b>brush</b>() [<>](https://github.com/d3/d3-brush/blob/master/src/brush.js#L131 "Source")
 
 Creates a new two-dimensional brush.
 

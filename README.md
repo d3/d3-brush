@@ -47,7 +47,7 @@ Creates a new one-dimensional brush along the *x*-dimension.
 
 Creates a new one-dimensional brush along the *y*-dimension.
 
-<a href="#_brush" name="_brush">#</a> <i>brush</i>(<i>group</i>)
+<a href="#_brush" name="_brush">#</a> <i>brush</i>(<i>group</i>) [<>](https://github.com/Devinsuit/d3-brush/blob/master/src/brush.js#L142 "Source Code")
 
 Applies the brush to the specified *group*, which must be a [selection](https://github.com/d3/d3-selection) of SVG [G elements](https://www.w3.org/TR/SVG/struct.html#Groups). This function is typically not invoked directly, and is instead invoked via [*selection*.call](https://github.com/d3/d3-selection#selection_call). For example, to render a brush:
 

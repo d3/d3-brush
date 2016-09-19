@@ -409,8 +409,7 @@ function brush(dim) {
         if (type in flipY) overlay.attr("cursor", cursors[type = flipY[type]]);
       }
 
-      selection = state.selection; // May be set by brush.move!
-
+      if (state.selection) selection = state.selection; // May be set by brush.move!
       if (lockX) w1 = selection[0][0], e1 = selection[1][0];
       if (lockY) n1 = selection[0][1], s1 = selection[1][1];
 
@@ -437,6 +436,7 @@ function brush(dim) {
       }
       group.attr("pointer-events", "all");
       overlay.attr("cursor", cursors.overlay);
+      if (state.selection) selection = state.selection; // May be set by brush.move (on start)!
       if (empty(selection)) state.selection = null, redraw.call(that);
       emit.end();
     }

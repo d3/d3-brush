@@ -112,7 +112,7 @@ function local(node) {
 
 function empty(extent) {
   return extent[0][0] === extent[1][0]
-      || extent[0][1] === extent[1][1];
+      && extent[0][1] === extent[1][1];
 }
 
 export function brushSelection(node) {

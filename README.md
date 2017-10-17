@@ -10,6 +10,10 @@ Brushes also support programmatic control. For example, you can listen to [*end*
 
 [<img alt="Brush Snapping" src="https://raw.githubusercontent.com/d3/d3-brush/master/img/snapping.png" width="420" height="219">](http://bl.ocks.org/mbostock/6232537)
 
+Or you can have the brush recenter when you click outside the current selection:
+
+[<img alt="Click-to-Recenter" src="https://raw.githubusercontent.com/d3/d3-brush/master/img/recenter.jpg" width="420" height="219">](https://bl.ocks.org/mbostock/6498000)
+
 ## Installing
 
 If you use NPM, `npm install d3-brush`. Otherwise, download the [latest release](https://github.com/d3/d3-brush/releases/latest). You can also load directly from [d3js.org](https://d3js.org), either as a [standalone library](https://d3js.org/d3-brush.v1.min.js) or as part of [D3 4.0](https://github.com/d3/d3). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:

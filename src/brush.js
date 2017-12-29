@@ -142,11 +142,11 @@ function brush(dim) {
   function brush(group) {
     var overlay = group
         .property("__brush", initialize)
-      .selectAll(".overlay")
+      .selectAll(".__d3_overlay")
       .data([type("overlay")]);
 
     overlay.enter().append("rect")
-        .attr("class", "overlay")
+        .attr("class", "__d3_overlay")
         .attr("pointer-events", "all")
         .attr("cursor", cursors.overlay)
       .merge(overlay)
@@ -334,7 +334,7 @@ function brush(dim) {
     var group = select(that)
         .attr("pointer-events", "none");
 
-    var overlay = group.selectAll(".overlay")
+    var overlay = group.selectAll(".__d3_overlay")
         .attr("cursor", cursors[type]);
 
     if (event.touches) {

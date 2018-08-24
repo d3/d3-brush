@@ -3,4 +3,4 @@ export {
   brushX,
   brushY,
   brushSelection
-} from "./src/brush";
+} from "./brush";

@@ -14,7 +14,7 @@
     "name": "Mike Bostock",
     "url": "http://bost.ocks.org/mike"
   },
-  "main": "build/d3-brush.js",
+  "main": "dist/d3-brush.min.js",
   "module": "index",
   "jsnext:main": "index",
   "repository": {
@@ -22,10 +22,10 @@
     "url": "https://github.com/d3/d3-brush.git"
   },
   "scripts": {
-    "pretest": "rm -rf build && mkdir build && rollup --banner \"$(preamble)\" -g d3-dispatch:d3,d3-drag:d3,d3-interpolate:d3,d3-selection:d3,d3-transition:d3 -f umd -n d3 -o build/d3-brush.js -- index.js",
+    "pretest": "rollup -c",
     "test": "tape 'test/**/*-test.js' && eslint index.js src",
-    "prepublish": "npm run test && uglifyjs --preamble \"$(preamble)\" build/d3-brush.js -c -m -o build/d3-brush.min.js",
-    "postpublish": "git push && git push --tags && cd ../d3.github.com && git pull && cp ../d3-brush/build/d3-brush.js d3-brush.v1.js && cp ../d3-brush/build/d3-brush.min.js d3-brush.v1.min.js && git add d3-brush.v1.js d3-brush.v1.min.js && git commit -m \"d3-brush ${npm_package_version}\" && git push && cd - && zip -j build/d3-brush.zip -- LICENSE README.md build/d3-brush.js build/d3-brush.min.js"
+    "prepublishOnly": "rm -rf dist && yarn test",
+    "postpublish": "git push && git push --tags && cd ../d3.github.com && git pull && cp ../${npm_package_name}/dist/${npm_package_name}.js ${npm_package_name}.v1.js && cp ../${npm_package_name}/dist/${npm_package_name}.min.js ${npm_package_name}.v1.min.js && git add ${npm_package_name}.v1.js ${npm_package_name}.v1.min.js && git commit -m \"${npm_package_name} ${npm_package_version}\" && git push && cd - && zip -j dist/${npm_package_name}.zip -- LICENSE README.md dist/${npm_package_name}.js dist/${npm_package_name}.min.js"
   },
   "dependencies": {
     "d3-dispatch": "1",
@@ -35,10 +35,9 @@
     "d3-transition": "1"
   },
   "devDependencies": {
-    "eslint": "3",
-    "package-preamble": "0.0",
-    "rollup": "0.41",
-    "tape": "4",
-    "uglify-js": "^2.8.11"
+    "eslint": "5",
+    "rollup": "0.64",
+    "rollup-plugin-terser": "1",
+    "tape": "4"
   }
 }

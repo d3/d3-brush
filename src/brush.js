@@ -215,6 +215,13 @@ function brush(dim) {
         .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
   }
 
+  brush.start = function(group, passedEvent) {
+    group
+      .each(function() {
+        customEvent(passedEvent, started, this, [undefined, 0, [this]])
+      });
+  };
+
   brush.move = function(group, selection) {
     if (group.selection) {
       group
@@ -326,7 +333,7 @@ function brush(dim) {
     if (!filter.apply(this, arguments)) return;
 
     var that = this,
-        type = event.target.__data__.type,
+        type = (event.desiredTarget || event.target).__data__.type,
         mode = (keys && event.metaKey ? type = "overlay" : type) === "selection" ? MODE_DRAG : (keys && event.altKey ? MODE_CENTER : MODE_HANDLE),
         signX = dim === Y ? null : signsX[type],
         signY = dim === X ? null : signsY[type],

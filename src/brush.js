@@ -22,7 +22,7 @@ function number2(e) {
 
 var X = {
   name: "x",
-  handles: ["e", "w"].map(type),
+  handles: ["w", "e"].map(type),
   input: function(x, e) { return x && [[+x[0], e[0][1]], [+x[1], e[1][1]]]; },
   output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }
 };
@@ -36,7 +36,7 @@ var Y = {
 
 var XY = {
   name: "xy",
-  handles: ["n", "e", "s", "w", "nw", "ne", "se", "sw"].map(type),
+  handles: ["nw", "n", "ne", "w", "e", "sw", "s", "se"].map(type),
   input: number2,
   output: function(xy) { return xy; }
 };

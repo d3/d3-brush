@@ -1,6 +1,9 @@
 {
   "name": "d3-brush",
-  "version": "1.0.6",
+  "version": "1.1.0-rc.1",
+  "publishConfig": {
+    "tag": "next"
+  },
   "description": "Select a one- or two-dimensional region using the mouse or touch.",
   "keywords": [
     "d3",
@@ -22,6 +25,10 @@
     "type": "git",
     "url": "https://github.com/d3/d3-brush.git"
   },
+  "files": [
+    "dist/**/*.js",
+    "src/**/*.js"
+  ],
   "scripts": {
     "pretest": "rollup -c",
     "test": "tape 'test/**/*-test.js' && eslint src",
@@ -36,9 +43,9 @@
     "d3-transition": "1"
   },
   "devDependencies": {
-    "eslint": "5",
-    "rollup": "0.64",
-    "rollup-plugin-terser": "1",
+    "eslint": "6",
+    "rollup": "1",
+    "rollup-plugin-terser": "5",
     "tape": "4"
   }
 }

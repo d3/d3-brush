@@ -135,6 +135,10 @@ function touchable() {
 
 Touch event listeners are only registered if the detector returns truthy for the corresponding element when the brush is [applied](#_brush). The default detector works well for most browsers that are capable of touch input, but not all; Chrome’s mobile device emulator, for example, fails detection.
 
+<a href="#brush_keyModifiers" name="brush_keyModifiers">#</a> <i>brush</i>.<b>keyModifiers</b>([<i>modifiers</i>]) [<>](https://github.com/d3/d3-brush/blob/master/src/brush.js "Source")
+
+If *modifiers* is specified, sets whether the brush listens to key events during brushing and returns the brush. If *modifiers* is not specified, returns the current behavior, which defaults to true.
+
 <a href="#brush_handleSize" name="brush_handleSize">#</a> <i>brush</i>.<b>handleSize</b>([<i>size</i>]) [<>](https://github.com/d3/d3-brush/blob/master/src/brush.js "Source")
 
 If *size* is specified, sets the size of the brush handles to the specified number and returns the brush. If *size* is not specified, returns the current handle size, which defaults to six. This method must be called before [applying the brush](#_brush) to a selection; changing the handle size does not affect brushes that were previously rendered.

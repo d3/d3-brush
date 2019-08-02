@@ -281,8 +281,8 @@ function brush(dim) {
     }
   }
 
-  function emitter(that, args) {
-    return that.__brush.emitter || new Emitter(that, args);
+  function emitter(that, args, clean) {
+    return (!clean && that.__brush.emitter) || new Emitter(that, args);
   }
 
   function Emitter(that, args) {
@@ -340,7 +340,7 @@ function brush(dim) {
         lockY,
         point0 = mouse(that),
         point = point0,
-        emit = emitter(that, arguments).beforestart();
+        emit = emitter(that, arguments, true).beforestart();
 
     if (type === "overlay") {
       state.selection = selection = [

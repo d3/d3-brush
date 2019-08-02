@@ -294,6 +294,7 @@ function brush(dim) {
     },
     start: function() {
       if (this.starting) this.starting = false, this.emit("start");
+      else this.emit("brush");
       return this;
     },
     brush: function() {

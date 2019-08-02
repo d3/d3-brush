@@ -16,7 +16,7 @@ Or you can have the brush recenter when you click outside the current selection:
 
 ## Installing
 
-If you use NPM, `npm install d3-brush`. Otherwise, download the [latest release](https://github.com/d3/d3-brush/releases/latest). You can also load directly from [d3js.org](https://d3js.org), either as a [standalone library](https://d3js.org/d3-brush.v1.min.js) or as part of [D3 4.0](https://github.com/d3/d3). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
+If you use NPM, `npm install d3-brush`. Otherwise, download the [latest release](https://github.com/d3/d3-brush/releases/latest). You can load as a [standalone library](https://d3js.org/d3-brush.v1.min.js) or as part of [D3](https://github.com/d3/d3). ES modules, AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
 
 ```html
 <script src="https://d3js.org/d3-color.v1.min.js"></script>
@@ -34,8 +34,6 @@ var brush = d3.brush();
 
 </script>
 ```
-
-[Try d3-brush in your browser.](https://tonicdev.com/npm/d3-brush)
 
 ## API Reference
 

@@ -3,9 +3,9 @@ import {dragDisable, dragEnable} from "d3-drag";
 import {interpolate} from "d3-interpolate";
 import {customEvent, event, mouse, select} from "d3-selection";
 import {interrupt} from "d3-transition";
-import constant from "./constant";
-import BrushEvent from "./event";
-import noevent, {nopropagation} from "./noevent";
+import constant from "./constant.js";
+import BrushEvent from "./event.js";
+import noevent, {nopropagation} from "./noevent.js";
 
 var MODE_DRAG = {name: "drag"},
     MODE_SPACE = {name: "space"},

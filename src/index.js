@@ -3,4 +3,4 @@ export {
   brushX,
   brushY,
   brushSelection
-} from "./brush";
+} from "./brush.js";

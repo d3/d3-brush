@@ -218,7 +218,7 @@ function brush(dim) {
                 i = interpolate(selection0, selection1);
 
             function tween(t) {
-              state.selection = t === 1 && selection1 !== null ? null : i(t);
+              state.selection = t === 1 && selection1 === null ? null : i(t);
               redraw.call(that);
               emit.brush();
             }

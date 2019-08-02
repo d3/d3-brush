@@ -104,6 +104,10 @@ function defaultExtent() {
   return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];
 }
 
+function defaultTouchable() {
+  return "ontouchstart" in this;
+}
+
 // Like d3.local, but with the name “__brush” rather than auto-generated.
 function local(node) {
   while (!node.__brush) if (!(node = node.parentNode)) return;
@@ -135,6 +139,7 @@ export default function() {
 function brush(dim) {
   var extent = defaultExtent,
       filter = defaultFilter,
+      touchable = defaultTouchable,
       listeners = dispatch(brush, "start", "brush", "end"),
       handleSize = 6,
       touchending;
@@ -182,8 +187,13 @@ function brush(dim) {
         .each(redraw)
         .attr("fill", "none")
         .attr("pointer-events", "all")
-        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
-        .on("mousedown.brush touchstart.brush", started);
+        .on("mousedown.brush", started)
+      .filter(touchable)
+        .on("touchstart.brush", started)
+        .on("touchmove.brush", touchmoved)
+        .on("touchend.brush touchcancel.brush", touchended)
+        .style("touch-action", "none")
+        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
   }
 
   brush.move = function(group, selection) {
@@ -338,9 +348,8 @@ function brush(dim) {
         .attr("cursor", cursors[type]);
 
     if (event.touches) {
-      group
-          .on("touchmove.brush", moved, true)
-          .on("touchend.brush touchcancel.brush", ended, true);
+      emit.moved = moved;
+      emit.ended = ended;
     } else {
       var view = select(event.view)
           .on("keydown.brush", keydowned, true)
@@ -429,7 +438,6 @@ function brush(dim) {
         if (event.touches.length) return;
         if (touchending) clearTimeout(touchending);
         touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!
-        group.on("touchmove.brush touchend.brush touchcancel.brush", null);
       } else {
         dragEnable(event.view, moving);
         view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
@@ -509,6 +517,14 @@ function brush(dim) {
       }
       noevent();
     }
+  }
+
+  function touchmoved() {
+    emitter(this, arguments).moved();
+  }
+
+  function touchended() {
+    emitter(this, arguments).ended();
   }
 
   function initialize() {

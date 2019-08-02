@@ -242,6 +242,10 @@ function brush(dim) {
     }
   };
 
+  brush.clear = function(group) {
+    brush.move(group, null);
+  };
+
   function redraw() {
     var group = select(this),
         selection = local(this).selection;

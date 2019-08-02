@@ -152,6 +152,7 @@ function brush(dim) {
   var extent = defaultExtent,
       filter = defaultFilter,
       touchable = defaultTouchable,
+      keys = true,
       listeners = dispatch(brush, "start", "brush", "end"),
       handleSize = 6,
       touchending;
@@ -321,7 +322,7 @@ function brush(dim) {
 
     var that = this,
         type = event.target.__data__.type,
-        mode = (event.metaKey ? type = "overlay" : type) === "selection" ? MODE_DRAG : (event.altKey ? MODE_CENTER : MODE_HANDLE),
+        mode = (keys && event.metaKey ? type = "overlay" : type) === "selection" ? MODE_DRAG : (keys && event.altKey ? MODE_CENTER : MODE_HANDLE),
         signX = dim === Y ? null : signsX[type],
         signY = dim === X ? null : signsY[type],
         state = local(that),
@@ -334,7 +335,7 @@ function brush(dim) {
         dx = 0,
         dy = 0,
         moving,
-        shifting = signX && signY && event.shiftKey,
+        shifting = signX && signY && keys && event.shiftKey,
         lockX,
         lockY,
         point0 = mouse(that),
@@ -369,10 +370,11 @@ function brush(dim) {
       emit.ended = ended;
     } else {
       var view = select(event.view)
-          .on("keydown.brush", keydowned, true)
-          .on("keyup.brush", keyupped, true)
           .on("mousemove.brush", moved, true)
           .on("mouseup.brush", ended, true);
+      if (keys) view
+          .on("keydown.brush", keydowned, true)
+          .on("keyup.brush", keyupped, true)
 
       dragDisable(event.view);
     }
@@ -561,6 +563,10 @@ function brush(dim) {
 
   brush.handleSize = function(_) {
     return arguments.length ? (handleSize = +_, brush) : handleSize;
+  };
+
+  brush.keyModifiers = function(_) {
+    return arguments.length ? (keys = !!_, brush) : keys;
   };
 
   brush.on = function() {

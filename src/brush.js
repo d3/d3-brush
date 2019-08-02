@@ -12,24 +12,32 @@ var MODE_DRAG = {name: "drag"},
     MODE_HANDLE = {name: "handle"},
     MODE_CENTER = {name: "center"};
 
+function number1(e) {
+  return [+e[0], +e[1]];
+}
+
+function number2(e) {
+  return [number1(e[0]), number1(e[1])];
+}
+
 var X = {
   name: "x",
   handles: ["e", "w"].map(type),
-  input: function(x, e) { return x && [[x[0], e[0][1]], [x[1], e[1][1]]]; },
+  input: function(x, e) { return x && [[+x[0], e[0][1]], [+x[1], e[1][1]]]; },
   output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }
 };
 
 var Y = {
   name: "y",
   handles: ["n", "s"].map(type),
-  input: function(y, e) { return y && [[e[0][0], y[0]], [e[1][0], y[1]]]; },
+  input: function(y, e) { return y && [[e[0][0], +y[0]], [e[1][0], +y[1]]]; },
   output: function(xy) { return xy && [xy[0][1], xy[1][1]]; }
 };
 
 var XY = {
   name: "xy",
   handles: ["n", "e", "s", "w", "nw", "ne", "se", "sw"].map(type),
-  input: function(xy) { return xy; },
+  input: number2,
   output: function(xy) { return xy; }
 };
 
@@ -529,13 +537,13 @@ function brush(dim) {
 
   function initialize() {
     var state = this.__brush || {selection: null};
-    state.extent = extent.apply(this, arguments);
+    state.extent = number2(extent.apply(this, arguments));
     state.dim = dim;
     return state;
   }
 
   brush.extent = function(_) {
-    return arguments.length ? (extent = typeof _ === "function" ? _ : constant([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), brush) : extent;
+    return arguments.length ? (extent = typeof _ === "function" ? _ : constant(number2(_)), brush) : extent;
   };
 
   brush.filter = function(_) {

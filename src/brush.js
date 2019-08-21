@@ -36,7 +36,7 @@ var Y = {
 
 var XY = {
   name: "xy",
-  handles: ["nw", "n", "ne", "w", "e", "sw", "s", "se"].map(type),
+  handles: ["n", "w", "e", "s", "nw", "ne", "sw", "se"].map(type),
   input: function(xy) { return xy == null ? null : number2(xy); },
   output: function(xy) { return xy; }
 };

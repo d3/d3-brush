@@ -1,7 +1,7 @@
 import {dispatch} from "d3-dispatch";
 import {dragDisable, dragEnable} from "d3-drag";
 import {interpolate} from "d3-interpolate";
-import {customEvent, event, clientPoint, select} from "d3-selection";
+import {customEvent, event, touch, mouse, select} from "d3-selection";
 import {interrupt} from "d3-transition";
 import constant from "./constant.js";
 import BrushEvent from "./event.js";
@@ -18,6 +18,12 @@ function number1(e) {
 
 function number2(e) {
   return [number1(e[0]), number1(e[1])];
+}
+
+function toucher(identifier) {
+  return function(target) {
+    return touch(target, event.touches, identifier);
+  };
 }
 
 var X = {
@@ -315,13 +321,8 @@ function brush(dim) {
     }
   };
 
-  function pointer(target) {
-    return clientPoint(target, event.touches ? event.touches[0] : event);
-  }
-
   function started() {
-    if (event.touches) { if (event.changedTouches.length < event.touches.length) return noevent(); }
-    else if (touchending) return;
+    if (touchending && !event.touches) return;
     if (!filter.apply(this, arguments)) return;
 
     var that = this,
@@ -342,6 +343,7 @@ function brush(dim) {
         shifting = signX && signY && keys && event.shiftKey,
         lockX,
         lockY,
+        pointer = event.touches ? toucher(event.changedTouches[0].identifier) : mouse,
         point0 = pointer(that),
         point = point0,
         emit = emitter(that, arguments, true).beforestart();

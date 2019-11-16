@@ -159,7 +159,7 @@ function brush(dim) {
       filter = defaultFilter,
       touchable = defaultTouchable,
       keys = true,
-      listeners = dispatch(brush, "start", "brush", "end"),
+      listeners = dispatch("start", "brush", "end"),
       handleSize = 6,
       touchending;
 

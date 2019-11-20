@@ -568,6 +568,10 @@ function brush(dim) {
     return arguments.length ? (filter = typeof _ === "function" ? _ : constant(!!_), brush) : filter;
   };
 
+  brush.touchable = function(_) {
+    return arguments.length ? (touchable = typeof _ === "function" ? _ : constant(!!_), brush) : touchable;
+  };
+
   brush.handleSize = function(_) {
     return arguments.length ? (handleSize = +_, brush) : handleSize;
   };

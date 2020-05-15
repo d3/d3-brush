@@ -1,7 +1,7 @@
 import {dispatch} from "d3-dispatch";
 import {dragDisable, dragEnable} from "d3-drag";
 import {interpolate} from "d3-interpolate";
-import {customEvent, event, touch, mouse, select} from "d3-selection";
+import {pointer, select} from "d3-selection";
 import {interrupt} from "d3-transition";
 import constant from "./constant.js";
 import BrushEvent from "./event.js";
@@ -18,12 +18,6 @@ function number1(e) {
 
 function number2(e) {
   return [number1(e[0]), number1(e[1])];
-}
-
-function toucher(identifier) {
-  return function(target) {
-    return touch(target, event.touches, identifier);
-  };
 }
 
 var X = {
@@ -109,7 +103,7 @@ function type(t) {
 }
 
 // Ignore right-click, since that should open the context menu.
-function defaultFilter() {
+function defaultFilter(event) {
   return !event.ctrlKey && !event.button;
 }
 
@@ -319,11 +313,23 @@ function brush(dim) {
       return this;
     },
     emit: function(type) {
-      customEvent(new BrushEvent(brush, type, dim.output(this.state.selection)), listeners.apply, listeners, [type, this.that, this.args]);
+      var dispatch = listeners.copy(),
+          d = this.that.__data__;
+      dispatch.call(
+        type,
+        this.that,
+        new BrushEvent(type, {
+          sourceEvent: event,
+          target: brush,
+          selection: dim.output(this.state.selection),
+          dispatch
+        }),
+        d
+      );
     }
   };
 
-  function started() {
+  function started(event) {
     if (touchending && !event.touches) return;
     if (!filter.apply(this, arguments)) return;
 
@@ -345,8 +351,7 @@ function brush(dim) {
         shifting = signX && signY && keys && event.shiftKey,
         lockX,
         lockY,
-        pointer = event.touches ? toucher(event.changedTouches[0].identifier) : mouse,
-        point0 = pointer(that),
+        point0 = pointer(event.touches ? event.touches[0] : event, that),
         point = point0,
         emit = emitter(that, arguments, true).beforestart();
 
@@ -388,20 +393,20 @@ function brush(dim) {
       dragDisable(event.view);
     }
 
-    nopropagation();
+    nopropagation(event);
     interrupt(that);
     redraw.call(that);
     emit.start();
 
-    function moved() {
-      var point1 = pointer(that);
+    function moved(event) {
+      var point1 = pointer(event.touches ? event.touches[0] : event, that);
       if (shifting && !lockX && !lockY) {
         if (Math.abs(point1[0] - point[0]) > Math.abs(point1[1] - point[1])) lockY = true;
         else lockX = true;
       }
       point = point1;
       moving = true;
-      noevent();
+      noevent(event);
       move();
     }
 
@@ -460,8 +465,8 @@ function brush(dim) {
       }
     }
 
-    function ended() {
-      nopropagation();
+    function ended(event) {
+      nopropagation(event);
       if (event.touches) {
         if (event.touches.length) return;
         if (touchending) clearTimeout(touchending);
@@ -477,7 +482,7 @@ function brush(dim) {
       emit.end();
     }
 
-    function keydowned() {
+    function keydowned(event) {
       switch (event.keyCode) {
         case 16: { // SHIFT
           shifting = signX && signY;
@@ -507,7 +512,7 @@ function brush(dim) {
       noevent();
     }
 
-    function keyupped() {
+    function keyupped(event) {
       switch (event.keyCode) {
         case 16: { // SHIFT
           if (shifting) {
@@ -547,12 +552,12 @@ function brush(dim) {
     }
   }
 
-  function touchmoved() {
-    emitter(this, arguments).moved();
+  function touchmoved(event) {
+    emitter(this, arguments).moved(event);
   }
 
-  function touchended() {
-    emitter(this, arguments).ended();
+  function touchended(event) {
+    emitter(this, arguments).ended(event);
   }
 
   function initialize() {

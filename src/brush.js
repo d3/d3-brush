@@ -12,6 +12,8 @@ var MODE_DRAG = {name: "drag"},
     MODE_HANDLE = {name: "handle"},
     MODE_CENTER = {name: "center"};
 
+const {abs, max, min} = Math;
+
 function number1(e) {
   return [+e[0], +e[1]];
 }
@@ -351,16 +353,26 @@ function brush(dim) {
         shifting = signX && signY && keys && event.shiftKey,
         lockX,
         lockY,
-        point0 = pointer(event.touches ? event.touches[0] : event, that),
-        point = point0,
+        points = Array.from(event.touches || [event], t => {
+          const i = t.identifier;
+          t = pointer(t, that);
+          t.point0 = t.slice();
+          t.identifier = i;
+          return t;
+        }),
         emit = emitter(that, arguments, true).beforestart();
 
     if (type === "overlay") {
       if (selection) moving = true;
-      state.selection = selection = [
-        [w0 = dim === Y ? W : point0[0], n0 = dim === X ? N : point0[1]],
-        [e0 = dim === Y ? E : w0, s0 = dim === X ? S : n0]
-      ];
+      const pts = [points[0], points[1] || points[0]];
+      state.selection = selection = [[
+          w0 = dim === Y ? W : min(pts[0][0], pts[1][0]),
+          n0 = dim === X ? N : min(pts[0][1], pts[1][1])
+        ], [
+          e0 = dim === Y ? E : max(pts[0][0], pts[1][0]),
+          s0 = dim === X ? S : max(pts[0][1], pts[1][1])
+        ]];
+      if (points.length > 1) move();
     } else {
       w0 = selection[0][0];
       n0 = selection[0][1];
@@ -399,18 +411,26 @@ function brush(dim) {
     emit.start();
 
     function moved(event) {
-      var point1 = pointer(event.touches ? event.touches[0] : event, that);
-      if (shifting && !lockX && !lockY) {
-        if (Math.abs(point1[0] - point[0]) > Math.abs(point1[1] - point[1])) lockY = true;
-        else lockX = true;
+      for (const p of event.changedTouches || [event]) {
+        for (const d of points)
+          if (d.identifier === p.identifier) d.cur = pointer(p, that);
       }
-      point = point1;
+      if (shifting && !lockX && !lockY && points.length === 1) {
+        const point = points[0];
+        if (abs(point.cur[0] - point[0]) > abs(point.cur[1] - point[1]))
+          lockY = true;
+        else
+          lockX = true;
+      }
+      for (const point of points)
+        if (point.cur) point[0] = point.cur[0], point[1] = point.cur[1];
       moving = true;
       noevent(event);
       move();
     }
 
     function move() {
+      const point = points[0], point0 = point.point0;
       var t;
 
       dx = point[0] - point0[0];
@@ -419,20 +439,25 @@ function brush(dim) {
       switch (mode) {
         case MODE_SPACE:
         case MODE_DRAG: {
-          if (signX) dx = Math.max(W - w0, Math.min(E - e0, dx)), w1 = w0 + dx, e1 = e0 + dx;
-          if (signY) dy = Math.max(N - n0, Math.min(S - s0, dy)), n1 = n0 + dy, s1 = s0 + dy;
+          if (signX) dx = max(W - w0, min(E - e0, dx)), w1 = w0 + dx, e1 = e0 + dx;
+          if (signY) dy = max(N - n0, min(S - s0, dy)), n1 = n0 + dy, s1 = s0 + dy;
           break;
         }
         case MODE_HANDLE: {
-          if (signX < 0) dx = Math.max(W - w0, Math.min(E - w0, dx)), w1 = w0 + dx, e1 = e0;
-          else if (signX > 0) dx = Math.max(W - e0, Math.min(E - e0, dx)), w1 = w0, e1 = e0 + dx;
-          if (signY < 0) dy = Math.max(N - n0, Math.min(S - n0, dy)), n1 = n0 + dy, s1 = s0;
-          else if (signY > 0) dy = Math.max(N - s0, Math.min(S - s0, dy)), n1 = n0, s1 = s0 + dy;
+          if (points[1]) {
+            if (signX) w1 = max(W, min(E, points[0][0])), e1 = max(W, min(E, points[1][0])), signX = 1;
+            if (signY) n1 = max(N, min(S, points[0][1])), s1 = max(N, min(S, points[1][1])), signY = 1;
+          } else {
+            if (signX < 0) dx = max(W - w0, min(E - w0, dx)), w1 = w0 + dx, e1 = e0;
+            else if (signX > 0) dx = max(W - e0, min(E - e0, dx)), w1 = w0, e1 = e0 + dx;
+            if (signY < 0) dy = max(N - n0, min(S - n0, dy)), n1 = n0 + dy, s1 = s0;
+            else if (signY > 0) dy = max(N - s0, min(S - s0, dy)), n1 = n0, s1 = s0 + dy;
+          }
           break;
         }
         case MODE_CENTER: {
-          if (signX) w1 = Math.max(W, Math.min(E, w0 - dx * signX)), e1 = Math.max(W, Math.min(E, e0 + dx * signX));
-          if (signY) n1 = Math.max(N, Math.min(S, n0 - dy * signY)), s1 = Math.max(N, Math.min(S, s0 + dy * signY));
+          if (signX) w1 = max(W, min(E, w0 - dx * signX)), e1 = max(W, min(E, e0 + dx * signX));
+          if (signY) n1 = max(N, min(S, n0 - dy * signY)), s1 = max(N, min(S, s0 + dy * signY));
           break;
         }
       }

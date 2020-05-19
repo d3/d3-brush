@@ -509,7 +509,7 @@ function brush(dim) {
         }
         default: return;
       }
-      noevent();
+      noevent(event);
     }
 
     function keyupped(event) {
@@ -548,7 +548,7 @@ function brush(dim) {
         }
         default: return;
       }
-      noevent();
+      noevent(event);
     }
   }
 

@@ -298,7 +298,7 @@ function brush(dim) {
 
   Emitter.prototype = {
     beforestart: function() {
-      if (++this.active === 1) this.state.emitter = this, this.starting = true;
+      if (++this.active === 1) this.state.emitter = this, this.starting = true, this.dispatch = listeners.copy();
       return this;
     },
     start: function() {
@@ -315,8 +315,8 @@ function brush(dim) {
       return this;
     },
     emit: function(type) {
-      var dispatch = listeners.copy(),
-          d = this.that.__data__;
+      var dispatch = this.dispatch,
+          d = this.that.__data_;
       dispatch.call(
         type,
         this.that,

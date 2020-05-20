@@ -169,3 +169,25 @@ When a [brush event listener](#brush_on) is invoked, it receives the current bru
 * `type` - the string “start”, “brush” or “end”; see [*brush*.on](#brush_on).
 * `selection` - the current [brush selection](#brushSelection).
 * `sourceEvent` - the underlying input event, such as mousemove or touchmove.
+
+The *event* object also exposes the [*event*.on](#event_on) method.
+
+<a href="#event_on" name="event_on">#</a> <i>event</i>.<b>on</b>(<i>typenames</i>, [<i>listener</i>]) · [Source](https://github.com/d3/d3-brush/blob/master/src/event.js)
+
+Equivalent to [*brush*.on](#brush_on), but only applies to the current brush gesture. Before the brush gesture starts, a [copy](https://github.com/d3/d3-dispatch#dispatch_copy) of the current brush [event listeners](#brush_on) is made. This copy is bound to the current brush gesture and modified by *event*.on. This is useful for temporary listeners that only receive events for the current brush gesture. For example, this start event listener registers temporary brush and end event listeners as closures:
+
+```js
+function started(event, d) {
+  d3.select(this).classed("brushing", true);
+
+  event.on("brush", brushed).on("end", ended);
+
+  function brushed(event, d) {
+    console.log("brushing", d, "with", event.selection);
+  }
+
+  function ended(event, d) {
+    console.log("brush on", d, "ended at", event.selection);
+  }
+}
+```

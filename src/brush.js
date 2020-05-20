@@ -316,7 +316,7 @@ function brush(dim) {
     },
     emit: function(type) {
       var dispatch = this.dispatch,
-          d = this.that.__data_;
+          d = select(this.that).datum();
       dispatch.call(
         type,
         this.that,

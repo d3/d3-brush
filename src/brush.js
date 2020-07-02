@@ -212,7 +212,7 @@ function brush(dim) {
   }
 
   brush.move = function(group, selection) {
-    if (group.selection) {
+    if (group.selection && group.selection() !== group) {
       group
           .on("start.brush", function() { emitter(this, arguments).beforestart().start(); })
           .on("interrupt.brush end.brush", function() { emitter(this, arguments).end(); })

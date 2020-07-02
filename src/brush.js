@@ -214,8 +214,8 @@ function brush(dim) {
   brush.move = function(group, selection) {
     if (group.selection && group.selection() !== group) {
       group
-          .on("start.brush", function() { emitter(this, arguments).beforestart().start(); })
-          .on("interrupt.brush end.brush", function() { emitter(this, arguments).end(); })
+          .on("start.brush", function(event) { emitter(this, arguments).beforestart().start(event); })
+          .on("interrupt.brush end.brush", function(event) { emitter(this, arguments).end(event); })
           .tween("brush", function() {
             var that = this,
                 state = that.__brush,
@@ -301,23 +301,22 @@ function brush(dim) {
       if (++this.active === 1) this.state.emitter = this, this.starting = true, this.dispatch = listeners.copy();
       return this;
     },
-    start: function() {
-      if (this.starting) this.starting = false, this.emit("start");
-      else this.emit("brush");
+    start: function(event) {
+      if (this.starting) this.starting = false, this.emit("start", event);
+      else this.emit("brush", event);
       return this;
     },
-    brush: function() {
-      this.emit("brush");
+    brush: function(event) {
+      this.emit("brush", event);
       return this;
     },
-    end: function() {
-      if (--this.active === 0) delete this.state.emitter, this.emit("end");
+    end: function(event) {
+      if (--this.active === 0) delete this.state.emitter, this.emit("end", event);
       return this;
     },
-    emit: function(type) {
+    emit: function(type, event) {
       var dispatch = this.dispatch,
-          d = select(this.that).datum(),
-          event = this.args && this.args[0];
+          d = select(this.that).datum();
       dispatch.call(
         type,
         this.that,
@@ -427,10 +426,10 @@ function brush(dim) {
         if (point.cur) point[0] = point.cur[0], point[1] = point.cur[1];
       moving = true;
       noevent(event);
-      move();
+      move(event);
     }
 
-    function move() {
+    function move(event) {
       const point = points[0], point0 = point.point0;
       var t;
 
@@ -487,7 +486,7 @@ function brush(dim) {
           || selection[1][1] !== s1) {
         state.selection = [[w1, n1], [e1, s1]];
         redraw.call(that);
-        emit.brush();
+        emit.brush(event);
       }
     }
 
@@ -505,7 +504,7 @@ function brush(dim) {
       overlay.attr("cursor", cursors.overlay);
       if (state.selection) selection = state.selection; // May be set by brush.move (on start)!
       if (empty(selection)) state.selection = null, redraw.call(that);
-      emit.end();
+      emit.end(event);
     }
 
     function keydowned(event) {

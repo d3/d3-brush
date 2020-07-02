@@ -360,8 +360,7 @@ function brush(dim) {
           t.point0 = t.slice();
           t.identifier = i;
           return t;
-        }),
-        emit = emitter(that, arguments, true).beforestart();
+        });
 
     if (type === "overlay") {
       if (selection) moving = true;
@@ -392,6 +391,9 @@ function brush(dim) {
     var overlay = group.selectAll(".overlay")
         .attr("cursor", cursors[type]);
 
+    interrupt(that);
+    var emit = emitter(that, arguments, true).beforestart();
+
     if (event.touches) {
       emit.moved = moved;
       emit.ended = ended;
@@ -406,8 +408,6 @@ function brush(dim) {
       dragDisable(event.view);
     }
 
-    nopropagation(event);
-    interrupt(that);
     redraw.call(that);
     emit.start();
 

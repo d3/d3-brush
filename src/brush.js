@@ -298,7 +298,7 @@ function brush(dim) {
 
   Emitter.prototype = {
     beforestart: function() {
-      if (++this.active === 1) this.state.emitter = this, this.starting = true, this.dispatch = listeners.copy();
+      if (++this.active === 1) this.state.emitter = this, this.starting = true;
       return this;
     },
     start: function(event) {
@@ -315,16 +315,15 @@ function brush(dim) {
       return this;
     },
     emit: function(type, event) {
-      var dispatch = this.dispatch,
-          d = select(this.that).datum();
-      dispatch.call(
+      var d = select(this.that).datum();
+      listeners.call(
         type,
         this.that,
         new BrushEvent(type, {
           sourceEvent: event,
           target: brush,
           selection: dim.output(this.state.selection),
-          dispatch
+          dispatch: listeners
         }),
         d
       );

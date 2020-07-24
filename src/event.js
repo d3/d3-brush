@@ -12,8 +12,3 @@ export default function BrushEvent(type, {
     _: {value: dispatch}
   });
 }
-
-BrushEvent.prototype.on = function() {
-  var value = this._.on.apply(this._, arguments);
-  return value === this._ ? this : value;
-};

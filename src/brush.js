@@ -231,7 +231,7 @@ function brush(dim) {
             function tween(t) {
               state.selection = t === 1 && selection1 === null ? null : i(t);
               redraw.call(that);
-              emit.brush();
+              emit.brush(mode);
             }
 
             return selection0 !== null && selection1 !== null ? tween : tween(1);
@@ -248,7 +248,7 @@ function brush(dim) {
             interrupt(that);
             state.selection = selection1 === null ? null : selection1;
             redraw.call(that);
-            emit.start().brush().end();
+            emit.start(mode).brush(mode).end(mode);
           });
     }
   };
@@ -305,21 +305,21 @@ function brush(dim) {
       if (++this.active === 1) this.state.emitter = this, this.starting = true;
       return this;
     },
-    start: function() {
-      if (this.starting) this.starting = false, this.emit("start");
-      else this.emit("brush");
+    start: function(mode) {
+      if (this.starting) this.starting = false, this.emit("start", mode);
+      else this.emit("brush", mode);
       return this;
     },
-    brush: function() {
-      this.emit("brush");
+    brush: function(mode) {
+      this.emit("brush", mode);
       return this;
     },
-    end: function() {
-      if (--this.active === 0) delete this.state.emitter, this.emit("end");
+    end: function(mode) {
+      if (--this.active === 0) delete this.state.emitter, this.emit("end", mode);
       return this;
     },
-    emit: function(type) {
-      customEvent(new BrushEvent(brush, type, dim.output(this.state.selection)), listeners.apply, listeners, [type, this.that, this.args]);
+    emit: function(type, mode) {
+      customEvent(new BrushEvent(brush, type, dim.output(this.state.selection), mode), listeners.apply, listeners, [type, this.that, this.args]);
     }
   };
 
@@ -391,7 +391,7 @@ function brush(dim) {
     nopropagation();
     interrupt(that);
     redraw.call(that);
-    emit.start();
+    emit.start(mode);
 
     function moved() {
       var point1 = pointer(that);
@@ -456,7 +456,7 @@ function brush(dim) {
           || selection[1][1] !== s1) {
         state.selection = [[w1, n1], [e1, s1]];
         redraw.call(that);
-        emit.brush();
+        emit.brush(mode);
       }
     }
 
@@ -474,7 +474,7 @@ function brush(dim) {
       overlay.attr("cursor", cursors.overlay);
       if (state.selection) selection = state.selection; // May be set by brush.move (on start)!
       if (empty(selection)) state.selection = null, redraw.call(that);
-      emit.end();
+      emit.end(mode);
     }
 
     function keydowned() {

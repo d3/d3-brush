@@ -231,7 +231,7 @@ function brush(dim) {
             function tween(t) {
               state.selection = t === 1 && selection1 === null ? null : i(t);
               redraw.call(that);
-              emit.brush(mode);
+              emit.brush();
             }
 
             return selection0 !== null && selection1 !== null ? tween : tween(1);
@@ -248,7 +248,7 @@ function brush(dim) {
             interrupt(that);
             state.selection = selection1 === null ? null : selection1;
             redraw.call(that);
-            emit.start(mode).brush(mode).end(mode);
+            emit.start().brush().end();
           });
     }
   };

@@ -391,7 +391,7 @@ function brush(dim) {
     nopropagation();
     interrupt(that);
     redraw.call(that);
-    emit.start(mode);
+    emit.start(mode.name);
 
     function moved() {
       var point1 = pointer(that);
@@ -456,7 +456,7 @@ function brush(dim) {
           || selection[1][1] !== s1) {
         state.selection = [[w1, n1], [e1, s1]];
         redraw.call(that);
-        emit.brush(mode);
+        emit.brush(mode.name);
       }
     }
 
@@ -474,7 +474,7 @@ function brush(dim) {
       overlay.attr("cursor", cursors.overlay);
       if (state.selection) selection = state.selection; // May be set by brush.move (on start)!
       if (empty(selection)) state.selection = null, redraw.call(that);
-      emit.end(mode);
+      emit.end(mode.name);
     }
 
     function keydowned() {

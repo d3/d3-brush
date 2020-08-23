@@ -1,9 +1,6 @@
 {
   "name": "d3-brush",
   "version": "2.0.0-rc.1",
-  "publishConfig": {
-    "tag": "next"
-  },
   "description": "Select a one- or two-dimensional region using the mouse or touch.",
   "keywords": [
     "d3",

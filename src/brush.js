@@ -408,7 +408,7 @@ function brush(dim) {
     }
 
     redraw.call(that);
-    emit.start(undefined, mode.name);
+    emit.start(event, mode.name);
 
     function moved(event) {
       for (const p of event.changedTouches || [event]) {

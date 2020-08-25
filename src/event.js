@@ -10,7 +10,7 @@ export default function BrushEvent(type, {
     sourceEvent: {value: sourceEvent, enumerable: true, configurable: true},
     target: {value: target, enumerable: true, configurable: true},
     selection: {value: selection, enumerable: true, configurable: true},
-    mode: {value: mode, enenumerable: true, configurable: true},
+    mode: {value: mode, enumerable: true, configurable: true},
     _: {value: dispatch}
   });
 }

@@ -323,7 +323,7 @@ function brush(dim) {
           sourceEvent: event,
           target: brush,
           selection: dim.output(this.state.selection),
-          mode: mode,
+          mode,
           dispatch: listeners
         }),
         d

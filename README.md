@@ -169,3 +169,4 @@ When a [brush event listener](#brush_on) is invoked, it receives the current bru
 * `type` - the string “start”, “brush” or “end”; see [*brush*.on](#brush_on).
 * `selection` - the current [brush selection](#brushSelection).
 * `sourceEvent` - the underlying input event, such as mousemove or touchmove.
+* `mode` - the string “drag”, “space”, “handle” or “center”; the mode of the brush.

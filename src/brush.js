@@ -301,20 +301,20 @@ function brush(dim) {
       if (++this.active === 1) this.state.emitter = this, this.starting = true;
       return this;
     },
-    start: function(event) {
-      if (this.starting) this.starting = false, this.emit("start", event);
+    start: function(event, mode) {
+      if (this.starting) this.starting = false, this.emit("start", event, mode);
       else this.emit("brush", event);
       return this;
     },
-    brush: function(event) {
-      this.emit("brush", event);
+    brush: function(event, mode) {
+      this.emit("brush", event, mode);
       return this;
     },
-    end: function(event) {
-      if (--this.active === 0) delete this.state.emitter, this.emit("end", event);
+    end: function(event, mode) {
+      if (--this.active === 0) delete this.state.emitter, this.emit("end", event, mode);
       return this;
     },
-    emit: function(type, event) {
+    emit: function(type, event, mode) {
       var d = select(this.that).datum();
       listeners.call(
         type,
@@ -323,6 +323,7 @@ function brush(dim) {
           sourceEvent: event,
           target: brush,
           selection: dim.output(this.state.selection),
+          mode,
           dispatch: listeners
         }),
         d
@@ -407,7 +408,7 @@ function brush(dim) {
     }
 
     redraw.call(that);
-    emit.start(event);
+    emit.start(event, mode.name);
 
     function moved(event) {
       for (const p of event.changedTouches || [event]) {
@@ -485,7 +486,7 @@ function brush(dim) {
           || selection[1][1] !== s1) {
         state.selection = [[w1, n1], [e1, s1]];
         redraw.call(that);
-        emit.brush(event);
+        emit.brush(event, mode.name);
       }
     }
 
@@ -503,7 +504,7 @@ function brush(dim) {
       overlay.attr("cursor", cursors.overlay);
       if (state.selection) selection = state.selection; // May be set by brush.move (on start)!
       if (empty(selection)) state.selection = null, redraw.call(that);
-      emit.end(event);
+      emit.end(event, mode.name);
     }
 
     function keydowned(event) {

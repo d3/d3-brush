@@ -20,15 +20,25 @@ If you use npm, `npm install d3-brush`. You can also download the [latest releas
 
 ```html
 <script type="module">
+
 import {brushX} from "https://cdn.skypack.dev/d3-brush@3";
 
 const brush = brushX();
+
 </script>
 ```
 
 For legacy environments, you can load d3-brush’s UMD bundle from an npm-based CDN such as jsDelivr; a `d3` global is exported:
 
 ```html
+<script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-ease@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-selection@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-timer@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-drag@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-transition@3"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-brush@3"></script>
 <script>
 

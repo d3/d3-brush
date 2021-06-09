@@ -16,24 +16,37 @@ Or you can have the brush recenter when you click outside the current selection:
 
 ## Installing
 
-If you use NPM, `npm install d3-brush`. Otherwise, download the [latest release](https://github.com/d3/d3-brush/releases/latest). You can load as a [standalone library](https://d3js.org/d3-brush.v1.min.js) or as part of [D3](https://github.com/d3/d3). ES modules, AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
+If you use npm, `npm install d3-brush`. You can also download the [latest release on GitHub](https://github.com/d3/d3-brush/releases/latest). For vanilla HTML in modern browsers, import d3-brush from Skypack:
 
 ```html
-<script src="https://d3js.org/d3-color.v2.min.js"></script>
-<script src="https://d3js.org/d3-dispatch.v2.min.js"></script>
-<script src="https://d3js.org/d3-ease.v2.min.js"></script>
-<script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
-<script src="https://d3js.org/d3-timer.v2.min.js"></script>
-<script src="https://d3js.org/d3-selection.v2.min.js"></script>
-<script src="https://d3js.org/d3-transition.v2.min.js"></script>
-<script src="https://d3js.org/d3-drag.v2.min.js"></script>
-<script src="https://d3js.org/d3-brush.v2.min.js"></script>
-<script>
+<script type="module">
 
-var brush = d3.brush();
+import {brushX} from "https://cdn.skypack.dev/d3-brush@3";
+
+const brush = brushX();
 
 </script>
 ```
+
+For legacy environments, you can load d3-brush’s UMD bundle from an npm-based CDN such as jsDelivr; a `d3` global is exported:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-ease@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-selection@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-timer@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-drag@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-transition@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-brush@3"></script>
+<script>
+
+const brush = d3.brushX();
+
+</script>
+```
+
 
 [Try d3-brush in your browser.](https://observablehq.com/collection/@d3/d3-brush)
 

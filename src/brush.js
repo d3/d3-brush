@@ -227,7 +227,7 @@ function brush(dim) {
             function tween(t) {
               state.selection = t === 1 && selection1 === null ? null : i(t);
               redraw.call(that);
-              emit.brush(event);
+              emit.brush();
             }
 
             return selection0 !== null && selection1 !== null ? tween : tween(1);
@@ -249,8 +249,8 @@ function brush(dim) {
     }
   };
 
-  brush.clear = function(group) {
-    brush.move(group, null);
+  brush.clear = function(group, event) {
+    brush.move(group, null, event);
   };
 
   function redraw() {

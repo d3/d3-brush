@@ -99,11 +99,11 @@ The brush also creates the SVG elements necessary to display the brush selection
 
 The overlay rect covers the brushable area defined by [*brush*.extent](#brush_extent). The selection rect covers the area defined by the current [brush selection](#brushSelection). The handle rects cover the edges and corners of the brush selection, allowing the corresponding value in the brush selection to be modified interactively. To modify the brush selection programmatically, use [*brush*.move](#brush_move).
 
-<a href="#brush_move" name="brush_move">#</a> <i>brush</i>.<b>move</b>(<i>group</i>, <i>selection</i>) · [Source](https://github.com/d3/d3-brush/blob/master/src/brush.js), [Examples](https://observablehq.com/d/93b91f86f9ebc9b9)
+<a href="#brush_move" name="brush_move">#</a> <i>brush</i>.<b>move</b>(<i>group</i>, <i>selection</i>[, <i>event</i>]) · [Source](https://github.com/d3/d3-brush/blob/master/src/brush.js), [Examples](https://observablehq.com/d/93b91f86f9ebc9b9)
 
 Sets the active *selection* of the brush on the specified *group*, which must be a [selection](https://github.com/d3/d3-selection) or a [transition](https://github.com/d3/d3-transition) of SVG [G elements](https://www.w3.org/TR/SVG/struct.html#Groups). The *selection* must be defined as an array of numbers, or null to clear the brush selection. For a [two-dimensional brush](#brush), it must be defined as [[*x0*, *y0*], [*x1*, *y1*]], where *x0* is the minimum *x*-value, *y0* is the minimum *y*-value, *x1* is the maximum *x*-value, and *y1* is the maximum *y*-value. For an [*x*-brush](#brushX), it must be defined as [*x0*, *x1*]; for a [*y*-brush](#brushY), it must be defined as [*y0*, *y1*]. The selection may also be specified as a function which returns such an array; if a function, it is invoked for each selected element, being passed the current datum `d` and index `i`, with the `this` context as the current DOM element. The returned array defines the brush selection for that element.
 
-<a href="#brush_clear" name="brush_clear">#</a> <i>brush</i>.<b>clear</b>(<i>group</i>) · [Source](https://github.com/d3/d3-brush/blob/master/src/brush.js), [Examples](https://observablehq.com/@d3/double-click-brush-clear)
+<a href="#brush_clear" name="brush_clear">#</a> <i>brush</i>.<b>clear</b>(<i>group</i>[, <i>event</i>]) · [Source](https://github.com/d3/d3-brush/blob/master/src/brush.js), [Examples](https://observablehq.com/@d3/double-click-brush-clear)
 
 An alias for [*brush*.move](#brush_move) with the null selection.
 

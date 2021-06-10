@@ -1,6 +1,6 @@
 {
   "name": "d3-brush",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Select a one- or two-dimensional region using the mouse or touch.",
   "homepage": "https://d3js.org/d3-brush/",
   "repository": {

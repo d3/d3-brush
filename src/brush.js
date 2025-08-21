@@ -578,11 +578,13 @@ function brush(dim) {
   }
 
   function touchmoved(event) {
-    emitter(this, arguments).moved(event);
+    const e = emitter(this, arguments);
+    if (e.moved) e.moved(event);
   }
 
   function touchended(event) {
-    emitter(this, arguments).ended(event);
+    const e = emitter(this, arguments);
+    if (e.ended) e.ended(event);
   }
 
   function initialize() {

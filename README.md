@@ -7,6 +7,6 @@ Brushing is the interactive specification a one- or two-dimensional selected reg
 ## Resources
 
 - [Documentation](https://d3js.org/d3-brush)
-- [Examples](https://observablehq.com/collection/@d3/d3-brush)
+- [Examples](https://observablehq.com/@d3/-/collection/d3-brush)
 - [Releases](https://github.com/d3/d3-brush/releases)
 - [Getting help](https://d3js.org/community)
